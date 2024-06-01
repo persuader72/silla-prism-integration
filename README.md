@@ -20,23 +20,23 @@ TODO...
 
 ## Entities
 
-| Topic                       | Desription                                                   | Entity | Unit |
-| --------------------------- | ------------------------------------------------------------ | ------ | ---- |
-| ?/1/state                   | Stato attuale della Prism                                    | Sensor |      |
-| ?/1/volt                    | Tensione attualmente misurata da Prism                       | Sensor | V    |
-| ?/1/w                       | Potenza attualmente erogata dalla porta di ricarica          | Sensor | W    |
-| ?/1/amp                     | Corrente attualmente erogata dalla porta di ricarica         | Sensor | mA   |
-| ?/1/pilot                   | Corrente pilotata all’auto                                   | Sensor | A    |
-| ?/1/user_amp                | Corrente impostata dall’utente                               | Sensor | A    |
-| ?/1/session_time            | Durata della sessione di ricarica attuale                    | (TODO) | s    |
-| ?/1/wh                      | Energia erogata dalla porta di ricarica durante la sessione in corso | Sensor | Wh   |
-| ?/1/wh_total                | Energia totale erogata da Prism                              | Sensor | Wh   |
-| ?/1/error                   | Codice di errore relativo alla porta                         | (TODO) |      |
-| ?/1/mode                    | Modalità attuale della porta                                 | Sensor |      |
-| ?/1/input/touch             | Sequenza pulsante touch                                      | (TODO) |      |
-| ?/energy_data/power_grid    | Potenza attualmente prelevata dalla rete                     | Sensor | W    |
-| ?/command/set_mode          | Imposta la modalità di Prism                                 | Select |      |
-| ?/command/set_current_user  | Imposta la corrente massima di ricarica specificata dall’utente | Number | A    |
-| ?/command/set_current_limit | Imposta il limite di corrente di ricarica, in ampere         | Number | A    |
-|                             |                                                              |        |      |
+| Topic                       | Desription                                                   | Entity | Unit                                   |
+| --------------------------- | ------------------------------------------------------------ | ------ | -------------------------------------- |
+| ?/1/state                   | Stato attuale della Prism                                    | Sensor | "idle", "waiting", "charging", "pause" |
+| ?/1/volt                    | Tensione attualmente misurata da Prism                       | Sensor | V                                      |
+| ?/1/w                       | Potenza attualmente erogata dalla porta di ricarica          | Sensor | W                                      |
+| ?/1/amp                     | Corrente attualmente erogata dalla porta di ricarica         | Sensor | mA                                     |
+| ?/1/pilot                   | Corrente pilotata all’auto                                   | Sensor | A                                      |
+| ?/1/user_amp                | Corrente impostata dall’utente                               | Sensor | A                                      |
+| ?/1/session_time            | Durata della sessione di ricarica attuale                    | Sensor | s                                      |
+| ?/1/wh                      | Energia erogata dalla porta di ricarica durante la sessione in corso | Sensor | Wh                                     |
+| ?/1/wh_total                | Energia totale erogata da Prism                              | Sensor | Wh                                     |
+| ?/1/error                   | Codice di errore relativo alla porta                         | (TODO) |                                        |
+| ?/1/mode                    | Modalità attuale della porta                                 | Sensor |                                        |
+| ?/1/input/touch             | Sequenza pulsante touch                                      | (TODO) |                                        |
+| ?/energy_data/power_grid    | Potenza attualmente prelevata dalla rete                     | Sensor | W                                      |
+| ?/command/set_mode          | Imposta la modalità di Prism                                 | Select |                                        |
+| ?/command/set_current_user  | Imposta la corrente massima di ricarica specificata dall’utente | Number | A                                      |
+| ?/command/set_current_limit | Imposta il limite di corrente di ricarica, in ampere         | Number | A                                      |
+|                             |                                                              |        |                                        |
 

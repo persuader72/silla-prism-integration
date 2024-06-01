@@ -14,6 +14,7 @@ from homeassistant.const import (
     UnitOfElectricPotential,
     UnitOfEnergy,
     UnitOfPower,
+    UnitOfTime,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityDescription
@@ -141,6 +142,15 @@ SENSORS: tuple[SensorEntityDescription, ...] = (
         suggested_display_precision=0,
         has_entity_name=True,
         translation_key="user_amp",
+    ),
+    SensorEntityDescription(
+        key="session_time",
+        device_class=SensorDeviceClass.DURATION,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfTime.SECONDS,
+        suggested_display_precision=0,
+        has_entity_name=True,
+        translation_key="session_time",
     ),
     SensorEntityDescription(
         key="wh",
