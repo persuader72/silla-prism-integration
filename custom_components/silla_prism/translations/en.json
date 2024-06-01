@@ -1,0 +1,78 @@
+{
+    "config": {
+        "abort": {
+            "all_configured": "All Philips Hue bridges are already configured",
+            "already_configured": "Bridge is already configured",
+            "cannot_connect": "Unable to connect to the bridge",
+            "discover_timeout": "Unable to discover Hue bridges",
+            "no_bridges": "No Philips Hue bridges discovered",
+            "unknown": "Unknown error occurred"
+        },
+        "error": {
+            "linking": "Unknown linking error occurred.",
+            "register_failed": "Failed to register, please try again"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "topic": "Topic"
+                },
+                "description": "Please enter connection settings of your",
+                "title": "Configure Silla Prsim"
+            }
+        }
+    },
+    "entity": {
+        "binary_sensor": {
+            "input_touch": {
+                "name": "Pulsante touch"
+            }
+        },
+        "number": {
+            "set_current_limit": {
+                "name": "Limite corrente"
+            },
+            "set_current_user": {
+                "name": "Corrente utente"
+            }
+        },
+        "select": {
+            "set_mode": {
+                "name": "Imposta modlit\u00e0 porta"
+            }
+        },
+        "sensor": {
+            "amp": {
+                "name": "Corrente erogata"
+            },
+            "mode": {
+                "name": "Modo della porta"
+            },
+            "pilot": {
+                "name": "Corrente pilotata dall'auto"
+            },
+            "power_grid": {
+                "name": "Potenza prelevata dalla rete"
+            },
+            "state": {
+                "name": "Stato wallbox"
+            },
+            "user_amp": {
+                "name": "Corrente limitata dall'utente"
+            },
+            "volt": {
+                "name": "Tensione di rete"
+            },
+            "w": {
+                "name": "Potenza assorbita"
+            },
+            "wh": {
+                "name": "Energia erogata ultima sessione"
+            },
+            "wh_total": {
+                "name": "Energia erogata totale"
+            }
+        }
+    },
+    "title": "Silla Prism connector"
+}
