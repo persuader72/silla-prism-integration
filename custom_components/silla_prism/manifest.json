@@ -1,6 +1,6 @@
 {
   "domain": "silla_prism",
-  "name": "Silla Prism Wall",
+  "name": "Silla Prism Wallbox",
   "codeowners": ["@persuader72"],
   "config_flow": true,
   "dependencies": ["mqtt"],
