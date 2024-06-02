@@ -55,3 +55,4 @@ Prerequisites: A working MQTT server.
 2. Expire non sensor entities
 3. Mixed Italian and English in code and documentation.
 4. Resolve TODOs in code
+5. Handle input touch button
