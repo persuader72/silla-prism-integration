@@ -49,6 +49,12 @@ Prerequisites: A working MQTT server.
 | ?/command/set_current_limit | Imposta il limite di corrente di ricarica, in ampere         | Number | A                                      |
 |                             |                                                              |        |                                        |
 
+## Frontend configuration
+
+![Charger](images/setup4.png)
+
+It's possible to configure the [EV Charger Card](https://github.com/tmjo/charger-card) using the configuration example [provided](https://github.com/persuader72/custom-components/blob/main/charger-card.yaml) in this repository 
+
 ## TODO
 
 1. Translations (English)
