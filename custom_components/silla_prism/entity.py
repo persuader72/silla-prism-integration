@@ -33,7 +33,6 @@ class PrismEntity(Entity):
             self._topic = base_topic + description.key
         else:
             self._topic = base_topic + "1/" + description.key
-        self.entity_id = "sensor.prism_" + description.key
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, "SillaPrism001")},
             name="Prism",
