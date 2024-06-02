@@ -16,7 +16,16 @@ Prerequisites: A working MQTT server.
 
 ## Usage
 
-TODO...
+1. Add integration Silla Prism using the dashboard  [![Open your Home Assistant instance and start setting up a new integration of a specific brand.](https://my.home-assistant.io/badges/brand.svg)](https://my.home-assistant.io/redirect/brand/?brand=silla_prism) 
+
+2. Keep note of base path for all Prism topics
+
+   ![Prism manual](images/setup3.png)
+
+3. When asked for connection settings set the the base path for all Prism topics. For now it is important to leave a / at the end of the topics as shown in the following picture)
+   ![Configure Silla Prism](images/setup2.png)
+
+   
 
 ## Entities
 
@@ -40,3 +49,9 @@ TODO...
 | ?/command/set_current_limit | Imposta il limite di corrente di ricarica, in ampere         | Number | A                                      |
 |                             |                                                              |        |                                        |
 
+## TODO
+
+1. Translations (English)
+2. Expire non sensor entities
+3. Mixed Italian and English in code and documentation.
+4. Resolve TODOs in code
