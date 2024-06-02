@@ -1,5 +1,7 @@
 """Contains sensors exposed by the Prism wallbox integration."""
 
+from asyncio import run_coroutine_threadsafe
+from datetime import datetime
 import logging
 
 from homeassistant.components.sensor import (
@@ -16,9 +18,10 @@ from homeassistant.const import (
     UnitOfPower,
     UnitOfTime,
 )
-from homeassistant.core import HomeAssistant
+from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
 from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.event import async_call_later
 
 from .domain_data import DomainData
 from .entity import PrismEntity
@@ -42,6 +45,9 @@ async def async_setup_entry(
 class PrismSensor(PrismEntity, SensorEntity):
     """A Sensor for Prism wallbox devices."""
 
+    _expire_after: int | None
+    _expiration_trigger: CALLBACK_TYPE | None = None
+
     entity_description: SensorEntityDescription
     _attr_should_poll = False
 
@@ -50,13 +56,18 @@ class PrismSensor(PrismEntity, SensorEntity):
     ) -> None:
         """Init Prism sensor."""
         super().__init__(base_topic, description)
-        self._hass: HomeAssistant = hass
         self._unsubscribe = None
+
+        # TODO: Put this in config
+        self._expire_after = 600
+        # Init expire proceudre
+        if self._expire_after is not None and self._expire_after > 0:
+            self._attr_available = False
 
     async def _subscribe_topic(self):
         """Subscribe to mqtt topic."""
         _LOGGER.debug("_subscribe_topic: %s", self._topic)
-        self._unsubscribe = await self._hass.components.mqtt.async_subscribe(
+        self._unsubscribe = await self.hass.components.mqtt.async_subscribe(
             self._topic, self.message_received
         )
 
@@ -66,8 +77,29 @@ class PrismSensor(PrismEntity, SensorEntity):
         if self._unsubscribe is not None:
             await self._unsubscribe()
 
-    def message_received(self, msg) -> None:
+    @callback
+    def _value_is_expired(self, *_: datetime) -> None:
+        """Triggered when value is expired."""
+        _LOGGER.debug("_value_is_expired %s", self._topic)
+        self._expiration_trigger = None
+        self._attr_available = False
+        self.async_write_ha_state()
+
+    def _message_received(self, msg) -> None:
         """Update the sensor with the most recent event."""
+        _LOGGER.debug("_message_received %s %s", self._topic, msg.payload)
+        if self._expire_after is not None and self._expire_after > 0:
+            # When self._expire_after is set, and we receive a message, assume
+            # device is not expired since it has to be to receive the message
+            self._attr_available = True
+            # Reset old trigger
+            if self._expiration_trigger:
+                self._expiration_trigger()
+            # Set new trigger
+            self._expiration_trigger = async_call_later(
+                self.hass, self._expire_after, self._value_is_expired
+            )
+        # Update native value
         if self.options is not None:
             try:
                 self._attr_native_value = self.options[int(msg.payload) - 1]
@@ -75,17 +107,28 @@ class PrismSensor(PrismEntity, SensorEntity):
                 self._attr_native_value = None
         else:
             self._attr_native_value = msg.payload
+        # Schedule update ha state
         self.schedule_update_ha_state()
+
+    def message_received(self, msg) -> None:
+        """Update the sensor with the most recent event."""
+        self.hass.loop.call_soon_threadsafe(self._message_received, msg)
 
     async def async_added_to_hass(self) -> None:
         """Subscribe to mqtt."""
         _LOGGER.debug("async_added_to_hass")
+        self._attr_available = False
         await self._subscribe_topic()
 
     async def async_will_remove_from_hass(self) -> None:
         """Unsubscribe from mqtt."""
-        _LOGGER.debug("async_will_remove_from_hass")
+        _LOGGER.debug("called async_will_remove_from_hass fir %s", self.entity_id)
         await super().async_will_remove_from_hass()
+        # Clean up expire triggers
+        if self._expiration_trigger:
+            self._expiration_trigger()
+            self._expiration_trigger = None
+            self._attr_available = True
         if self._unsubscribe is not None:
             await self._unsubscribe_topic()
 
