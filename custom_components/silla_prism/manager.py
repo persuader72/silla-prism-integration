@@ -1,6 +1,6 @@
 """Manager for Prism wallbox."""
 
-from homeassistant.components.esphome.domain_data import DomainData
+from .domain_data import DomainData
 from homeassistant.core import HomeAssistant
 
 from .entry_data import RuntimeEntryData
