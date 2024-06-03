@@ -49,6 +49,9 @@
       "binary_sensor": {
         "input_touch": {
           "name": "Pulsante touch"
+        },
+        "online": {
+          "name": "Connesione attiva"
         }
       }
     },

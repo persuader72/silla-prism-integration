@@ -6,6 +6,7 @@ from homeassistant.components import mqtt
 from homeassistant.components.number import NumberEntity, NumberEntityDescription
 from homeassistant.components.number.const import NumberDeviceClass, NumberMode
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -57,6 +58,7 @@ class PrismNumber(PrismBaseEntity, NumberEntity):
 NUMBERS: tuple[NumberEntityDescription, ...] = (
     NumberEntityDescription(
         key="set_current_user",
+        entity_category=EntityCategory.CONFIG,
         device_class=NumberDeviceClass.CURRENT,
         native_min_value=6,
         native_max_value=16,
@@ -66,6 +68,7 @@ NUMBERS: tuple[NumberEntityDescription, ...] = (
     ),
     NumberEntityDescription(
         key="set_current_limit",
+        entity_category=EntityCategory.CONFIG,
         device_class=NumberDeviceClass.CURRENT,
         native_min_value=6,
         native_max_value=16,

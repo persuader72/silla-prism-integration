@@ -5,6 +5,7 @@ import logging
 from homeassistant.components import mqtt
 from homeassistant.components.select import SelectEntity, SelectEntityDescription
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -55,6 +56,7 @@ class PrismSelect(PrismBaseEntity, SelectEntity):
 SELECTS: tuple[SelectEntityDescription, ...] = (
     SelectEntityDescription(
         key="set_mode",
+        entity_category=EntityCategory.CONFIG,
         options=["solar", "normal", "paused"],
         has_entity_name=True,
         translation_key="set_mode",
