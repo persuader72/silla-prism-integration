@@ -29,7 +29,7 @@ details:
         text: Provided current
         unit_show: true
   info_left:
-    - entity_id: sensor.hacs
+    - entity_id: binary_sensor.prism_connesione_attiva
       text: online
   info_right:
     - entity_id: sensor.prism_tensione_di_rete
