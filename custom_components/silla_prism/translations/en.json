@@ -18,64 +18,64 @@
                     "topic": "Topic"
                 },
                 "description": "Please enter connection settings of your",
-                "title": "Configure Silla Prsim"
+                "title": "Configure Silla Prsim Integration"
             }
         }
     },
     "entity": {
         "binary_sensor": {
             "input_touch": {
-                "name": "Pulsante touch"
+                "name": "Touch button"
             },
             "online": {
-                "name": "Connesione attiva"
+                "name": "Is online "
             }
         },
         "number": {
             "set_current_limit": {
-                "name": "Limite corrente"
+                "name": "Current limit"
             },
             "set_current_user": {
-                "name": "Corrente utente"
+                "name": "Current limited by user"
             }
         },
         "select": {
             "set_mode": {
-                "name": "Imposta modlit\u00e0 porta"
+                "name": "Set port output mode"
             }
         },
         "sensor": {
             "amp": {
-                "name": "Corrente erogata"
+                "name": "Output current"
             },
             "mode": {
-                "name": "Modo della porta"
+                "name": "Current port output mode"
             },
             "pilot": {
-                "name": "Corrente pilotata dall'auto"
+                "name": "Car requested by car"
             },
             "power_grid": {
-                "name": "Potenza prelevata dalla rete"
+                "name": "Power from utility"
             },
             "state": {
-                "name": "Stato wallbox"
+                "name": "Wallbox overall state"
             },
             "user_amp": {
-                "name": "Corrente limitata dall'utente"
+                "name": "Current limited by user"
             },
             "volt": {
-                "name": "Tensione di rete"
+                "name": "Network voltage"
             },
             "w": {
-                "name": "Potenza assorbita"
+                "name": "Power provided to car"
             },
             "wh": {
-                "name": "Energia erogata ultima sessione"
+                "name": "Energy provided in last session"
             },
             "wh_total": {
-                "name": "Energia erogata totale"
+                "name": "Total energy"
             }
         }
     },
-    "title": "Silla Prism connector"
+    "title": "Silla Prism Integration"
 }
