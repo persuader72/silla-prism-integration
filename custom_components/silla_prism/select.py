@@ -1,5 +1,6 @@
 """Silla Prism select entity module."""
 
+from dataclasses import dataclass
 import logging
 
 from homeassistant.components import mqtt
@@ -30,13 +31,23 @@ async def async_setup_entry(
     async_add_entities(selects)
 
 
+@dataclass(frozen=True, kw_only=True)
+class PrismSelectEntityDescription(SelectEntityDescription):
+    """A class that describes prism binary sensor entities."""
+
+    expire_after: float = 600
+
+
 class PrismSelect(PrismBaseEntity, SelectEntity):
     """A Select for Prism wallbox devices."""
 
-    entity_description: SelectEntityDescription
+    entity_description: PrismSelectEntityDescription
 
     def __init__(
-        self, hass: HomeAssistant, base_topic: str, description: SelectEntityDescription
+        self,
+        hass: HomeAssistant,
+        base_topic: str,
+        description: PrismSelectEntityDescription,
     ) -> None:
         """Init Prism select."""
         super().__init__(base_topic, description)
@@ -53,8 +64,8 @@ class PrismSelect(PrismBaseEntity, SelectEntity):
         )
 
 
-SELECTS: tuple[SelectEntityDescription, ...] = (
-    SelectEntityDescription(
+SELECTS: tuple[PrismSelectEntityDescription, ...] = (
+    PrismSelectEntityDescription(
         key="set_mode",
         entity_category=EntityCategory.CONFIG,
         options=["solar", "normal", "paused"],

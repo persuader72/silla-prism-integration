@@ -1,5 +1,6 @@
 """Contains numbers configurations for Prism wallbox integration."""
 
+from dataclasses import dataclass
 import logging
 
 from homeassistant.components.binary_sensor import (
@@ -35,12 +36,21 @@ async def async_setup_entry(
     async_add_entities(binsens)
 
 
+@dataclass(frozen=True, kw_only=True)
+class PrismBinarySensorEntityDescription(BinarySensorEntityDescription):
+    """A class that describes prism binary sensor entities."""
+
+    expire_after: float = 600
+
+
 class PrismBinarySensor(PrismBaseEntity, BinarySensorEntity):
     """Prism number entity."""
 
-    entity_description: BinarySensorEntityDescription
+    entity_description: PrismBinarySensorEntityDescription
 
-    def __init__(self, base_topic: str, description: EntityDescription) -> None:
+    def __init__(
+        self, base_topic: str, description: PrismBinarySensorEntityDescription
+    ) -> None:
         """Init Prism select."""
         super().__init__(base_topic, description)
         self._attr_is_on = False
@@ -94,15 +104,16 @@ class PrismBinarySensor(PrismBaseEntity, BinarySensorEntity):
             await self._unsubscribe_topic()
 
 
-BINARYSENSORS: tuple[BinarySensorEntityDescription, ...] = (
-    BinarySensorEntityDescription(
+BINARYSENSORS = [
+    PrismBinarySensorEntityDescription(
         key="energy_data/power_grid",
         entity_category=EntityCategory.DIAGNOSTIC,
         device_class=BinarySensorDeviceClass.CONNECTIVITY,
         has_entity_name=True,
         translation_key="online",
+        expire_after=0,
     ),
-)
+]
 
 
 # BinarySensorEntityDescription(

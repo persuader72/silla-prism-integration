@@ -1,5 +1,6 @@
 """Contains numbers configurations for Prism wallbox integration."""
 
+from dataclasses import dataclass
 import logging
 
 from homeassistant.components import mqtt
@@ -8,7 +9,6 @@ from homeassistant.components.number.const import NumberDeviceClass, NumberMode
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .domain_data import DomainData
@@ -32,13 +32,23 @@ async def async_setup_entry(
     async_add_entities(selects)
 
 
+@dataclass(frozen=True, kw_only=True)
+class PrismNumberEntityDescription(NumberEntityDescription):
+    """A class that describes prism binary sensor entities."""
+
+    expire_after: float = 600
+
+
 class PrismNumber(PrismBaseEntity, NumberEntity):
     """Prism number entity."""
 
-    entity_description: NumberEntityDescription
+    entity_description: PrismNumberEntityDescription
 
     def __init__(
-        self, hass: HomeAssistant, base_topic: str, description: EntityDescription
+        self,
+        hass: HomeAssistant,
+        base_topic: str,
+        description: PrismNumberEntityDescription,
     ) -> None:
         """Init Prism select."""
         super().__init__(base_topic, description)
@@ -55,8 +65,8 @@ class PrismNumber(PrismBaseEntity, NumberEntity):
         await mqtt.async_publish(self._hass, self._topic, int(value))
 
 
-NUMBERS: tuple[NumberEntityDescription, ...] = (
-    NumberEntityDescription(
+NUMBERS: tuple[PrismNumberEntityDescription, ...] = (
+    PrismNumberEntityDescription(
         key="set_current_user",
         entity_category=EntityCategory.CONFIG,
         device_class=NumberDeviceClass.CURRENT,
@@ -66,7 +76,7 @@ NUMBERS: tuple[NumberEntityDescription, ...] = (
         has_entity_name=True,
         translation_key="set_current_user",
     ),
-    NumberEntityDescription(
+    PrismNumberEntityDescription(
         key="set_current_limit",
         entity_category=EntityCategory.CONFIG,
         device_class=NumberDeviceClass.CURRENT,

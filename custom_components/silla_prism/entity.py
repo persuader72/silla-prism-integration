@@ -14,13 +14,21 @@ from .const import DOMAIN
 _LOGGER = logging.getLogger(__name__)
 
 
+class PrismBaseEntityDescription:
+    """A class that describes base prism entities."""
+
+    expire_after: float = 600
+
+
 class PrismBaseEntity(Entity):
     """A base Entity that is registered under a Prism device."""
 
     _expire_after: int | None
     _expiration_trigger: CALLBACK_TYPE | None = None
 
-    def __init__(self, base_topic: str, description: EntityDescription) -> None:
+    def __init__(
+        self, base_topic: str, description: PrismBaseEntityDescription
+    ) -> None:
         """Initialize the device info and set the update coordinator."""
         if "energy_data" in description.key:
             self._topic = base_topic + description.key
@@ -36,7 +44,7 @@ class PrismBaseEntity(Entity):
         self.entity_description = description
 
         # TODO: Put this in config
-        self._expire_after = 600
+        self._expire_after = description.expire_after
         # Init expire proceudre
         if self._expire_after is not None and self._expire_after > 0:
             self._attr_available = False
