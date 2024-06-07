@@ -66,12 +66,12 @@ description: Avvia ricarica dopo pressione pulsante
 trigger:
   - platform: state
     entity_id:
-      - binary_sensor.silla_prism_input_touch
+      - binary_sensor.silla_prism_touch_sigle
     from: "off"
     to: "on"
 condition:
   - condition: state
-    entity_id: sensor.prism_stato_wallbox
+    entity_id: sensor.silla_prism_current_state
     state: pause
 action:
   - service: mqtt.publish
@@ -91,12 +91,12 @@ description: Interrompi ricarica dopo pressione pulsante
 trigger:
   - platform: state
     entity_id:
-      - binary_sensor.silla_prism_input_touch
+      - binary_sensor.silla_prism_touch_sigle
     from: "off"
     to: "on"
 condition:
   - condition: state
-    entity_id: sensor.prism_stato_wallbox
+    entity_id: sensor.silla_prism_current_state
     state: charging
 action:
   - service: mqtt.publish
