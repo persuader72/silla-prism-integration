@@ -4,6 +4,7 @@ brand: silla
 show_leds: true
 show_name: true
 compact_view: false
+customImage: \local\prism_black_303_271.png
 debug: true
 details:
   name: Silla Prism
@@ -21,7 +22,7 @@ details:
         text: Total Energy
         unit_show: true
     charging:
-      - entity_id: sensor.silla_prism_wh
+      - entity_id: sensor.silla_prism_session_output_energy
         text: Session Energy
         unit_show: true
       - entity_id: sensor.silla_prism_output_current
