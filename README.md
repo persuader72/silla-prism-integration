@@ -29,31 +29,87 @@ Prerequisites: A working MQTT server.
 
 ## Entities
 
-| Topic                       | Desription                                                   | Entity | Unit                                   |
-| --------------------------- | ------------------------------------------------------------ | ------ | -------------------------------------- |
-| ?/1/state                   | Stato attuale della Prism                                    | Sensor | "idle", "waiting", "charging", "pause" |
-| ?/1/volt                    | Tensione attualmente misurata da Prism                       | Sensor | V                                      |
-| ?/1/w                       | Potenza attualmente erogata dalla porta di ricarica          | Sensor | W                                      |
-| ?/1/amp                     | Corrente attualmente erogata dalla porta di ricarica         | Sensor | mA                                     |
-| ?/1/pilot                   | Corrente pilotata all’auto                                   | Sensor | A                                      |
-| ?/1/user_amp                | Corrente impostata dall’utente                               | Sensor | A                                      |
-| ?/1/session_time            | Durata della sessione di ricarica attuale                    | Sensor | s                                      |
-| ?/1/wh                      | Energia erogata dalla porta di ricarica durante la sessione in corso | Sensor | Wh                                     |
-| ?/1/wh_total                | Energia totale erogata da Prism                              | Sensor | Wh                                     |
-| ?/1/error                   | Codice di errore relativo alla porta                         | (TODO) |                                        |
-| ?/1/mode                    | Modalità attuale della porta                                 | Sensor |                                        |
-| ?/1/input/touch             | Sequenza pulsante touch                                      | (TODO) |                                        |
-| ?/energy_data/power_grid    | Potenza attualmente prelevata dalla rete                     | Sensor | W                                      |
-| ?/command/set_mode          | Imposta la modalità di Prism                                 | Select |                                        |
-| ?/command/set_current_user  | Imposta la corrente massima di ricarica specificata dall’utente | Number | A                                      |
-| ?/command/set_current_limit | Imposta il limite di corrente di ricarica, in ampere         | Number | A                                      |
-|                             |                                                              |        |                                        |
+| Topic                       | Desription                                                   | Entity      | Unit                                   |
+| --------------------------- | ------------------------------------------------------------ | ----------- | -------------------------------------- |
+| ?/1/state                   | Current state of Prism                                       | Sensor      | "idle", "waiting", "charging", "pause" |
+| ?/1/volt                    | Measured voltage from grid                                   | Sensor      | V                                      |
+| ?/1/w                       | Power provided to the charging port                          | Sensor      | W                                      |
+| ?/1/amp                     | Current provided to the charging port                        | Sensor      | mA                                     |
+| ?/1/pilot                   | Current driven by the car                                    | Sensor      | A                                      |
+| ?/1/user_amp                | Current limit set by user                                    | Sensor      | A                                      |
+| ?/1/session_time            | Duration of the current session                              | Sensor      | s                                      |
+| ?/1/wh                      | Energy provided to the charging port during the current session | Sensor      | Wh                                     |
+| ?/1/wh_total                | Total energy                                                 | Sensor      | Wh                                     |
+| ?/1/error                   | Error code                                                   | (TODO)      |                                        |
+| ?/1/mode                    | Current port mode                                            | Sensor      |                                        |
+| ?/1/input/touch             | Touch button sequence events                                 | BinarySenor | single,double,long events              |
+| ?/energy_data/power_grid    | Input power from grid                                        | Sensor      | W                                      |
+| ?/command/set_mode          | Set the working mode                                         | Select      | Solar,Normal,Paused                    |
+| ?/command/set_current_user  | Set the user current limit                                   | Number      | A                                      |
+| ?/command/set_current_limit | Set the  current limit                                       | Number      | A                                      |
 
 ## Frontend configuration
 
 ![Charger](images/setup4.png)
 
 It's possible to configure the [EV Charger Card](https://github.com/tmjo/charger-card) using the configuration example [provided](https://github.com/persuader72/custom-components/blob/main/charger-card.yaml) in this repository 
+
+# Touch button and Automations
+
+This are some example automations for the touch button events
+
+### Start charge after single touch event if the wallbox is in pause state
+
+```yaml
+alias: Avvia ricarica dopo pressione pulsante
+description: Avvia ricarica dopo pressione pulsante
+trigger:
+  - platform: state
+    entity_id:
+      - binary_sensor.silla_prism_input_touch
+    from: "off"
+    to: "on"
+condition:
+  - condition: state
+    entity_id: sensor.prism_stato_wallbox
+    state: pause
+action:
+  - service: mqtt.publish
+    data:
+      qos: "0"
+      retain: true
+      topic: prism/1/command/set_mode
+      payload: "2"
+mode: single
+```
+
+### Stop charge after single touch event if the wallbox is in charging state
+
+```yaml
+alias: Interrompi ricarica dopo pressione pulsante
+description: Interrompi ricarica dopo pressione pulsante
+trigger:
+  - platform: state
+    entity_id:
+      - binary_sensor.silla_prism_input_touch
+    from: "off"
+    to: "on"
+condition:
+  - condition: state
+    entity_id: sensor.prism_stato_wallbox
+    state: charging
+action:
+  - service: mqtt.publish
+    metadata: {}
+    data:
+      qos: "0"
+      retain: true
+      topic: prism/1/command/set_mode
+      payload: "3"
+mode: single
+```
+
+
 
 ## TODO
 

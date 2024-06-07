@@ -1,7 +1,8 @@
 """Contains numbers configurations for Prism wallbox integration."""
 
-from dataclasses import dataclass
+from datetime import datetime
 import logging
+from typing import FrozenSet
 
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
@@ -10,9 +11,9 @@ from homeassistant.components.binary_sensor import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import EntityDescription
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.event import async_call_later
 
 from .domain_data import DomainData
 from .entity import PrismBaseEntity
@@ -33,18 +34,31 @@ async def async_setup_entry(
         PrismBinarySensor(entry_data.topic, description)
         for description in BINARYSENSORS
     ]
-    async_add_entities(binsens)
+    evsens = [
+        PrismEventBinarySensor(entry_data.topic, description)
+        for description in EVENTSENSORS
+    ]
+    async_add_entities(binsens + evsens)
 
 
-@dataclass(frozen=True, kw_only=True)
-class PrismBinarySensorEntityDescription(BinarySensorEntityDescription):
+class PrismBinarySensorEntityDescription(
+    BinarySensorEntityDescription, frozen_or_thawed=True
+):
     """A class that describes prism binary sensor entities."""
 
     expire_after: float = 600
 
 
+class PrismEventBinarySensorEntityDescription(
+    PrismBinarySensorEntityDescription, frozen_or_thawed=True
+):
+    """A class that describes prism button event sensor entities."""
+
+    sequence: FrozenSet[int] = (1,)
+
+
 class PrismBinarySensor(PrismBaseEntity, BinarySensorEntity):
-    """Prism number entity."""
+    """Prism binary sensor entity."""
 
     entity_description: PrismBinarySensorEntityDescription
 
@@ -52,7 +66,7 @@ class PrismBinarySensor(PrismBaseEntity, BinarySensorEntity):
         self, base_topic: str, description: PrismBinarySensorEntityDescription
     ) -> None:
         """Init Prism select."""
-        super().__init__(base_topic, description)
+        super().__init__("binary_sensor", base_topic, description)
         self._attr_is_on = False
         self._unsubscribe = None
 
@@ -76,15 +90,10 @@ class PrismBinarySensor(PrismBaseEntity, BinarySensorEntity):
         )
         self.schedule_expiration_callback()
 
-        if self._topic == "input/touch":
-            # Handle input touch button
-            self._attr_is_on = msg.payload != "0"
+        # Handle online presence
+        if not self._attr_is_on:
+            self._attr_is_on = True
             self.schedule_update_ha_state()
-        else:
-            # Handle online presence
-            if not self._attr_is_on:
-                self._attr_is_on = True
-                self.schedule_update_ha_state()
 
     def message_received(self, msg) -> None:
         """Update the sensor with the most recent event."""
@@ -104,6 +113,50 @@ class PrismBinarySensor(PrismBaseEntity, BinarySensorEntity):
             await self._unsubscribe_topic()
 
 
+class PrismEventBinarySensor(PrismBinarySensor):
+    """Prism button event sensor entity"""
+
+    entity_description: PrismEventBinarySensorEntityDescription
+
+    def __init__(
+        self, base_topic: str, description: PrismEventBinarySensorEntityDescription
+    ) -> None:
+        """Init Prism event binary sensor."""
+        super().__init__(base_topic, description)
+        self._sequence: FrozenSet[int] = description.sequence
+
+    def _message_received(self, msg) -> None:
+        """Update the sensor with the most recent event."""
+        _LOGGER.debug(
+            "PrismEventBinarySensor._message_received %s %s", self._topic, msg.payload
+        )
+        self.schedule_expiration_callback()
+
+        # Handle input touch button
+        _seq = msg.payload.split(",")
+        try:
+            _seq_int = [int(x) for x in _seq]
+            if len(_seq_int) == len(self._sequence):
+                for i, s in enumerate(_seq_int):
+                    if self._sequence[i] != s:
+                        break
+            self._attr_is_on = True
+            self._expiration_trigger = async_call_later(
+                self.hass, 1.0, self._restore_value
+            )
+            self.schedule_update_ha_state()
+        except ValueError:
+            pass
+
+    @callback
+    def _restore_value(self, *_: datetime) -> None:
+        """Triggered when value is expired."""
+        _LOGGER.debug("entity _value_is_expired for topic %s", self._topic)
+        self._expiration_trigger = None
+        self._attr_is_on = False
+        self.async_write_ha_state()
+
+
 BINARYSENSORS = [
     PrismBinarySensorEntityDescription(
         key="energy_data/power_grid",
@@ -111,6 +164,39 @@ BINARYSENSORS = [
         device_class=BinarySensorDeviceClass.CONNECTIVITY,
         has_entity_name=True,
         translation_key="online",
+        expire_after=0,
+    ),
+]
+
+EVENTSENSORS = [
+    PrismEventBinarySensorEntityDescription(
+        key="input/touch",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        device_class=BinarySensorDeviceClass.MOTION,
+        has_entity_name=True,
+        sequence=(1,),
+        translation_key="touch_sigle",
+        expire_after=0,
+    ),
+    PrismEventBinarySensorEntityDescription(
+        key="input/touch#1_1",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        device_class=BinarySensorDeviceClass.MOTION,
+        has_entity_name=True,
+        sequence=(
+            1,
+            1,
+        ),
+        translation_key="touch_double",
+        expire_after=0,
+    ),
+    PrismEventBinarySensorEntityDescription(
+        key="input/touch#3",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        device_class=BinarySensorDeviceClass.MOTION,
+        has_entity_name=True,
+        sequence=(3,),
+        translation_key="touch_long",
         expire_after=0,
     ),
 ]

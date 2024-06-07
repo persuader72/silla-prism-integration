@@ -12,6 +12,7 @@ from homeassistant.helpers.event import async_call_later
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
+ENTITY_ID_SENSOR_FORMAT = "{}." + DOMAIN + "_{}"
 
 
 class PrismBaseEntityDescription:
@@ -25,24 +26,37 @@ class PrismBaseEntity(Entity):
 
     _expire_after: int | None
     _expiration_trigger: CALLBACK_TYPE | None = None
+    _attr_should_poll = False
 
     def __init__(
-        self, base_topic: str, description: PrismBaseEntityDescription
+        self,
+        sensor_domain: str,
+        base_topic: str,
+        description: PrismBaseEntityDescription,
     ) -> None:
         """Initialize the device info and set the update coordinator."""
+        # extract topic from description key
         if "energy_data" in description.key:
             self._topic = base_topic + description.key
         else:
             self._topic = base_topic + "1/" + description.key
+        # Remove sharp character from topic if any
+        _sharp = self._topic.find("#")
+        if _sharp > 0:
+            self._topic = self._topic[0:_sharp]
+        # Create device instance
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, "SillaPrism001")},
             name="Prism",
             manufacturer="Silla",
             model="Prism",
         )
+        # Preload attributes
+        if not description.entity_category:
+            self._attr_entity_category = EntityCategory.DIAGNOSTIC
+        self.entity_id = ENTITY_ID_SENSOR_FORMAT.format(sensor_domain, description.key)
         self._attr_unique_id = "prism_" + description.key + "_001"
         self.entity_description = description
-
         # TODO: Put this in config
         self._expire_after = description.expire_after
         # Init expire proceudre
@@ -75,23 +89,3 @@ class PrismBaseEntity(Entity):
             self._expiration_trigger()
             self._expiration_trigger = None
             self._attr_available = True
-
-
-class PrismEntity(Entity):
-    """A base Entity that is registered under a Prism device."""
-
-    def __init__(self, base_topic: str, description: EntityDescription) -> None:
-        """Initialize the device info and set the update coordinator."""
-        if "energy_data" in description.key:
-            self._topic = base_topic + description.key
-        else:
-            self._topic = base_topic + "1/" + description.key
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, "SillaPrism001")},
-            name="Prism",
-            manufacturer="Silla",
-            model="Prism",
-        )
-        self._attr_entity_category = EntityCategory.DIAGNOSTIC
-        self._attr_unique_id = "prism_" + description.key + "_001"
-        self.entity_description = description

@@ -24,8 +24,14 @@
     },
     "entity": {
         "binary_sensor": {
-            "input_touch": {
-                "name": "Touch button"
+            "touch_sigle": {
+                "name": "Single touch"
+            },
+            "touch_double": {
+                "name": "Double touch"
+            },
+            "touch_long": {
+                "name": "Long touch"
             },
             "online": {
                 "name": "Is online "

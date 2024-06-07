@@ -1,6 +1,5 @@
 """Contains numbers configurations for Prism wallbox integration."""
 
-from dataclasses import dataclass
 import logging
 
 from homeassistant.components import mqtt
@@ -32,8 +31,7 @@ async def async_setup_entry(
     async_add_entities(selects)
 
 
-@dataclass(frozen=True, kw_only=True)
-class PrismNumberEntityDescription(NumberEntityDescription):
+class PrismNumberEntityDescription(NumberEntityDescription, frozen_or_thawed=True):
     """A class that describes prism binary sensor entities."""
 
     expire_after: float = 600
@@ -51,7 +49,7 @@ class PrismNumber(PrismBaseEntity, NumberEntity):
         description: PrismNumberEntityDescription,
     ) -> None:
         """Init Prism select."""
-        super().__init__(base_topic, description)
+        super().__init__("number", base_topic, description)
         self._hass: HomeAssistant = hass
 
     @property

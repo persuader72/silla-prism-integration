@@ -1,6 +1,5 @@
 """Contains sensors exposed by the Prism wallbox integration."""
 
-from asyncio import run_coroutine_threadsafe
 from datetime import datetime
 import logging
 
@@ -18,13 +17,13 @@ from homeassistant.const import (
     UnitOfPower,
     UnitOfTime,
 )
-from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import async_call_later
 
 from .domain_data import DomainData
-from .entity import PrismEntity
+from .entity import PrismBaseEntity
 from .entry_data import RuntimeEntryData
 
 _LOGGER = logging.getLogger(__name__)
@@ -36,26 +35,24 @@ async def async_setup_entry(
     """Set up all sensors for this entry."""
     entry_data: RuntimeEntryData = DomainData.get(hass).get_entry_data(entry)
     _LOGGER.debug("async_setup_entry for sensors: %s", entry_data)
-    sensors = [
-        PrismSensor(hass, entry_data.topic, description) for description in SENSORS
-    ]
+    sensors = [PrismSensor(entry_data.topic, description) for description in SENSORS]
     async_add_entities(sensors)
 
 
-class PrismSensor(PrismEntity, SensorEntity):
+class PrismSensorEntityDescription(SensorEntityDescription, frozen_or_thawed=True):
+    """A class that describes prism binary sensor entities."""
+
+    expire_after: float = 600
+
+
+class PrismSensor(PrismBaseEntity, SensorEntity):
     """A Sensor for Prism wallbox devices."""
 
-    _expire_after: int | None
-    _expiration_trigger: CALLBACK_TYPE | None = None
+    entity_description: PrismSensorEntityDescription
 
-    entity_description: SensorEntityDescription
-    _attr_should_poll = False
-
-    def __init__(
-        self, hass: HomeAssistant, base_topic: str, description: EntityDescription
-    ) -> None:
+    def __init__(self, base_topic: str, description: EntityDescription) -> None:
         """Init Prism sensor."""
-        super().__init__(base_topic, description)
+        super().__init__("sensor", base_topic, description)
         self._unsubscribe = None
 
         # TODO: Put this in config
@@ -133,15 +130,15 @@ class PrismSensor(PrismEntity, SensorEntity):
             await self._unsubscribe_topic()
 
 
-SENSORS: tuple[SensorEntityDescription, ...] = (
-    SensorEntityDescription(
+SENSORS: tuple[PrismSensorEntityDescription, ...] = (
+    PrismSensorEntityDescription(
         key="state",
         device_class=SensorDeviceClass.ENUM,
         options=["idle", "waiting", "charging", "pause"],
         has_entity_name=True,
         translation_key="state",
     ),
-    SensorEntityDescription(
+    PrismSensorEntityDescription(
         key="volt",
         device_class=SensorDeviceClass.VOLTAGE,
         state_class=SensorStateClass.MEASUREMENT,
@@ -150,7 +147,7 @@ SENSORS: tuple[SensorEntityDescription, ...] = (
         has_entity_name=True,
         translation_key="volt",
     ),
-    SensorEntityDescription(
+    PrismSensorEntityDescription(
         key="w",
         device_class=SensorDeviceClass.POWER,
         state_class=SensorStateClass.MEASUREMENT,
@@ -159,7 +156,7 @@ SENSORS: tuple[SensorEntityDescription, ...] = (
         has_entity_name=True,
         translation_key="w",
     ),
-    SensorEntityDescription(
+    PrismSensorEntityDescription(
         key="amp",
         device_class=SensorDeviceClass.CURRENT,
         state_class=SensorStateClass.MEASUREMENT,
@@ -168,7 +165,7 @@ SENSORS: tuple[SensorEntityDescription, ...] = (
         has_entity_name=True,
         translation_key="amp",
     ),
-    SensorEntityDescription(
+    PrismSensorEntityDescription(
         key="pilot",
         device_class=SensorDeviceClass.CURRENT,
         state_class=SensorStateClass.MEASUREMENT,
@@ -177,7 +174,7 @@ SENSORS: tuple[SensorEntityDescription, ...] = (
         has_entity_name=True,
         translation_key="pilot",
     ),
-    SensorEntityDescription(
+    PrismSensorEntityDescription(
         key="user_amp",
         device_class=SensorDeviceClass.CURRENT,
         state_class=SensorStateClass.MEASUREMENT,
@@ -186,7 +183,7 @@ SENSORS: tuple[SensorEntityDescription, ...] = (
         has_entity_name=True,
         translation_key="user_amp",
     ),
-    SensorEntityDescription(
+    PrismSensorEntityDescription(
         key="session_time",
         device_class=SensorDeviceClass.DURATION,
         state_class=SensorStateClass.MEASUREMENT,
@@ -195,7 +192,7 @@ SENSORS: tuple[SensorEntityDescription, ...] = (
         has_entity_name=True,
         translation_key="session_time",
     ),
-    SensorEntityDescription(
+    PrismSensorEntityDescription(
         key="wh",
         device_class=SensorDeviceClass.ENERGY,
         state_class=SensorStateClass.TOTAL,
@@ -204,7 +201,7 @@ SENSORS: tuple[SensorEntityDescription, ...] = (
         has_entity_name=True,
         translation_key="wh",
     ),
-    SensorEntityDescription(
+    PrismSensorEntityDescription(
         key="wh_total",
         device_class=SensorDeviceClass.ENERGY,
         state_class=SensorStateClass.TOTAL_INCREASING,
@@ -213,14 +210,14 @@ SENSORS: tuple[SensorEntityDescription, ...] = (
         has_entity_name=True,
         translation_key="wh_total",
     ),
-    SensorEntityDescription(
+    PrismSensorEntityDescription(
         key="mode",
         device_class=SensorDeviceClass.ENUM,
         options=["solar", "normal", "paused", "suspended"],
         has_entity_name=True,
         translation_key="mode",
     ),
-    SensorEntityDescription(
+    PrismSensorEntityDescription(
         key="energy_data/power_grid",
         device_class=SensorDeviceClass.POWER,
         state_class=SensorStateClass.MEASUREMENT,
