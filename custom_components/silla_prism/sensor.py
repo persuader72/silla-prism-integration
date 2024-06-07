@@ -35,7 +35,7 @@ async def async_setup_entry(
     """Set up all sensors for this entry."""
     entry_data: RuntimeEntryData = DomainData.get(hass).get_entry_data(entry)
     _LOGGER.debug("async_setup_entry for sensors: %s", entry_data)
-    sensors = [PrismSensor(entry_data.topic, description) for description in SENSORS]
+    sensors = [PrismSensor(entry_data, description) for description in SENSORS]
     async_add_entities(sensors)
 
 
@@ -43,6 +43,7 @@ class PrismSensorEntityDescription(SensorEntityDescription, frozen_or_thawed=Tru
     """A class that describes prism binary sensor entities."""
 
     expire_after: float = 600
+    topic: str = None
 
 
 class PrismSensor(PrismBaseEntity, SensorEntity):
@@ -50,16 +51,12 @@ class PrismSensor(PrismBaseEntity, SensorEntity):
 
     entity_description: PrismSensorEntityDescription
 
-    def __init__(self, base_topic: str, description: EntityDescription) -> None:
+    def __init__(
+        self, entry_data: RuntimeEntryData, description: EntityDescription
+    ) -> None:
         """Init Prism sensor."""
-        super().__init__("sensor", base_topic, description)
+        super().__init__(entry_data, "sensor", description)
         self._unsubscribe = None
-
-        # TODO: Put this in config
-        self._expire_after = 600
-        # Init expire proceudre
-        if self._expire_after is not None and self._expire_after > 0:
-            self._attr_available = False
 
     async def _subscribe_topic(self):
         """Subscribe to mqtt topic."""
@@ -132,59 +129,66 @@ class PrismSensor(PrismBaseEntity, SensorEntity):
 
 SENSORS: tuple[PrismSensorEntityDescription, ...] = (
     PrismSensorEntityDescription(
-        key="state",
+        key="current_state",
+        topic="1/state",
         device_class=SensorDeviceClass.ENUM,
         options=["idle", "waiting", "charging", "pause"],
         has_entity_name=True,
-        translation_key="state",
+        translation_key="current_state",
     ),
     PrismSensorEntityDescription(
-        key="volt",
+        key="power_grid_voltage",
+        topic="1/volt",
         device_class=SensorDeviceClass.VOLTAGE,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfElectricPotential.VOLT,
         suggested_display_precision=0,
         has_entity_name=True,
-        translation_key="volt",
+        translation_key="power_grid_voltage",
     ),
     PrismSensorEntityDescription(
-        key="w",
+        key="output_power",
+        topic="1/w",
         device_class=SensorDeviceClass.POWER,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfPower.WATT,
         suggested_display_precision=0,
         has_entity_name=True,
-        translation_key="w",
+        translation_key="output_power",
     ),
     PrismSensorEntityDescription(
-        key="amp",
+        key="output_current",
+        topic="1/amp",
         device_class=SensorDeviceClass.CURRENT,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfElectricCurrent.MILLIAMPERE,
         suggested_display_precision=0,
         has_entity_name=True,
-        translation_key="amp",
+        translation_key="output_current",
     ),
     PrismSensorEntityDescription(
-        key="pilot",
+        key="output_car_current",
+        topic="1/pilot",
         device_class=SensorDeviceClass.CURRENT,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfElectricCurrent.AMPERE,
         suggested_display_precision=0,
         has_entity_name=True,
-        translation_key="pilot",
+        translation_key="output_car_current",
     ),
     PrismSensorEntityDescription(
-        key="user_amp",
+        key="current_set_by_user",
+        topic="1/user_amp",
         device_class=SensorDeviceClass.CURRENT,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfElectricCurrent.AMPERE,
         suggested_display_precision=0,
         has_entity_name=True,
-        translation_key="user_amp",
+        translation_key="current_set_by_user",
     ),
     PrismSensorEntityDescription(
         key="session_time",
+        topic="1/session_time",
         device_class=SensorDeviceClass.DURATION,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfTime.SECONDS,
@@ -193,37 +197,42 @@ SENSORS: tuple[PrismSensorEntityDescription, ...] = (
         translation_key="session_time",
     ),
     PrismSensorEntityDescription(
-        key="wh",
+        key="session_output_energy",
+        topic="1/wh",
         device_class=SensorDeviceClass.ENERGY,
         state_class=SensorStateClass.TOTAL,
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         suggested_display_precision=0,
         has_entity_name=True,
-        translation_key="wh",
+        translation_key="session_output_energy",
     ),
     PrismSensorEntityDescription(
-        key="wh_total",
+        key="total_output_energy",
+        topic="1/wh_total",
         device_class=SensorDeviceClass.ENERGY,
         state_class=SensorStateClass.TOTAL_INCREASING,
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         suggested_display_precision=0,
         has_entity_name=True,
-        translation_key="wh_total",
+        translation_key="total_output_energy",
     ),
+    # FIXME: suspended is not 4 but 7
     PrismSensorEntityDescription(
-        key="mode",
+        key="current_port_mode",
+        topic="1/mode",
         device_class=SensorDeviceClass.ENUM,
         options=["solar", "normal", "paused", "suspended"],
         has_entity_name=True,
-        translation_key="mode",
+        translation_key="current_port_mode",
     ),
     PrismSensorEntityDescription(
-        key="energy_data/power_grid",
+        key="input_grid_power",
+        topic="energy_data/power_grid",
         device_class=SensorDeviceClass.POWER,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfPower.WATT,
         suggested_display_precision=0,
         has_entity_name=True,
-        translation_key="power_grid",
+        translation_key="input_grid_power",
     ),
 )

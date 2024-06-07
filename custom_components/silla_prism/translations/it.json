@@ -18,70 +18,70 @@
                     "topic": "Topic"
                 },
                 "description": "Please enter connection settings of your",
-                "title": "Configure Silla Prsim Integration"
+                "title": "Configure Silla Prsim"
             }
         }
     },
     "entity": {
         "binary_sensor": {
             "touch_sigle": {
-                "name": "Single touch"
+                "name": "Tocco singolo"
             },
             "touch_double": {
-                "name": "Double touch"
+                "name": "Doppio tocco"
             },
             "touch_long": {
-                "name": "Long touch"
+                "name": "Pressione lunga"
             },
             "online": {
-                "name": "Is online "
+                "name": "Connesione attiva"
             }
         },
         "number": {
             "set_current_limit": {
-                "name": "Current limit"
+                "name": "Limite corrente"
             },
             "set_max_current": {
-                "name": "Current limited by user"
+                "name": "Corrente utente"
             }
         },
         "select": {
             "set_port_mode": {
-                "name": "Set port output mode"
+                "name": "Imposta modlit\u00e0 porta"
             }
         },
         "sensor": {
             "output_current": {
-                "name": "Output current"
+                "name": "Corrente erogata"
             },
             "current_port_mode": {
-                "name": "Current port output mode"
+                "name": "Modo della porta"
             },
             "output_car_current": {
-                "name": "Car requested by car"
+                "name": "Corrente pilotata dall'auto"
             },
             "input_grid_power": {
-                "name": "Power from utility"
+                "name": "Potenza prelevata dalla rete"
             },
             "current_state": {
-                "name": "Wallbox current state"
+                "name": "Stato wallbox"
             },
             "current_set_by_user": {
-                "name": "Current limited by user"
+                "name": "Corrente limitata dall'utente"
             },
             "power_grid_voltage": {
-                "name": "Power grid voltage"
+                "name": "Tensione di rete"
             },
             "output_power": {
-                "name": "Power provided to car"
+                "name": "Potenza assorbita"
             },
             "session_output_energy": {
-                "name": "Energy provided in last session"
+                "name": "Energia erogata ultima sessione"
             },
             "total_output_energy": {
-                "name": "Total energy"
+                "name": "Energia erogata totale"
             }
         }
     },
-    "title": "Silla Prism Integration"
+    "title": "Silla Prism connector"
 }

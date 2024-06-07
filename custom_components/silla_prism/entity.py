@@ -9,16 +9,19 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity import Entity, EntityDescription
 from homeassistant.helpers.event import async_call_later
 
+from .entry_data import RuntimeEntryData
+
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 ENTITY_ID_SENSOR_FORMAT = "{}." + DOMAIN + "_{}"
 
 
-class PrismBaseEntityDescription:
+class PrismBaseEntityDescription(EntityDescription, frozen_or_thawed=True):
     """A class that describes base prism entities."""
 
     expire_after: float = 600
+    topic: str = None
 
 
 class PrismBaseEntity(Entity):
@@ -30,20 +33,12 @@ class PrismBaseEntity(Entity):
 
     def __init__(
         self,
+        entry_data: RuntimeEntryData,
         sensor_domain: str,
-        base_topic: str,
         description: PrismBaseEntityDescription,
     ) -> None:
         """Initialize the device info and set the update coordinator."""
-        # extract topic from description key
-        if "energy_data" in description.key:
-            self._topic = base_topic + description.key
-        else:
-            self._topic = base_topic + "1/" + description.key
-        # Remove sharp character from topic if any
-        _sharp = self._topic.find("#")
-        if _sharp > 0:
-            self._topic = self._topic[0:_sharp]
+        self._topic = entry_data.topic + description.topic
         # Create device instance
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, "SillaPrism001")},
