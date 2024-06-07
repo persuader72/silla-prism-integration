@@ -1,41 +1,40 @@
 type: custom:charger-card
-entity: sensor.prism_stato_wallbox
+entity: sensor.silla_prism_current_state
 brand: silla
 show_leds: true
 show_name: true
 compact_view: false
-customImage: \local\image.png
 debug: true
 details:
   name: Silla Prism
   location: Garage
   status:
-    entity_id: sensor.prism_stato_wallbox
+    entity_id: sensor.silla_prism_current_state
   substatus:
-    entity_id: sensor.prism_modo_della_porta
+    entity_id: sensor.silla_prism_current_port_mode
   stats:
     default:
-      - entity_id: sensor.prism_energia_erogata_ultima_sessione
+      - entity_id: sensor.silla_prism_session_output_energy
         text: Session Energy
         unit_show: true
-      - entity_id: sensor.prism_energia_erogata_totale
+      - entity_id: sensor.silla_prism_total_output_energy
         text: Total Energy
         unit_show: true
     charging:
-      - entity_id: sensor.prism_energia_erogata_ultima_sessione
+      - entity_id: sensor.silla_prism_wh
         text: Session Energy
         unit_show: true
-      - entity_id: sensor.prism_corrente_erogata
+      - entity_id: sensor.silla_prism_output_current
         text: Provided current
         unit_show: true
   info_left:
-    - entity_id: binary_sensor.prism_connesione_attiva
+    - entity_id: binary_sensor.silla_prism_online
       text: online
   info_right:
-    - entity_id: sensor.prism_tensione_di_rete
+    - entity_id: sensor.silla_prism_power_grid_voltage
       text: Main voltage
       unit_show: true
-    - entity_id: sensor.prism_potenza_prelevata_dalla_rete
+    - entity_id: sensor.silla_prism_input_grid_power
       text: Main power
       unit_show: true
   collapsiblebuttons:
@@ -43,7 +42,7 @@ details:
       text: Limits
       icon: mdi:speedometer
   group1:
-    - entity_id: sensor.prism_corrente_limitata_dall_utente
+    - entity_id: sensor.silla_prism_current_set_by_user
       text: User limited currnt
       service: mqtt.publish
       service_data:
@@ -88,4 +87,3 @@ details:
     - 11
     - 13
     - 15
-

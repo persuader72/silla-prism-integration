@@ -48,11 +48,11 @@ Prerequisites: A working MQTT server.
 | ?/command/set_current_user  | Set the user current limit                                   | Number      | A                                      |
 | ?/command/set_current_limit | Set the  current limit                                       | Number      | A                                      |
 
-## Frontend configuration
+## Charger Card Integragtion
 
 ![Charger](images/setup4.png)
 
-It's possible to configure the [EV Charger Card](https://github.com/tmjo/charger-card) using the configuration example [provided](https://github.com/persuader72/custom-components/blob/main/charger-card.yaml) in this repository 
+It's possible to configure the [EV Charger Card](https://github.com/tmjo/charger-card) using the configuration example [provided](https://github.com/persuader72/custom-components/blob/main/charger-card/template.yaml) in this repository 
 
 # Touch button and Automations
 
