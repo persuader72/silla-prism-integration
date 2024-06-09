@@ -34,6 +34,7 @@ class PrismSelectEntityDescription(SelectEntityDescription, frozen_or_thawed=Tru
 
     expire_after: float = 0
     topic: str = None
+    topic_out: str = None
 
 
 class PrismSelect(PrismBaseEntity, SelectEntity):
@@ -96,8 +97,9 @@ class PrismSelect(PrismBaseEntity, SelectEntity):
 
 SELECTS: tuple[PrismSelectEntityDescription, ...] = (
     PrismSelectEntityDescription(
-        key="1/mode",
+        key="set_mode",
         topic="1/command/set_mode",
+        topic_out="1/command/set_mode",
         entity_category=EntityCategory.CONFIG,
         options=["solar", "normal", "paused"],
         has_entity_name=True,
