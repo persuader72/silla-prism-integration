@@ -2,7 +2,7 @@
 
 from datetime import datetime
 import logging
-from typing import FrozenSet
+from typing import FrozenSet, override
 
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
@@ -69,21 +69,8 @@ class PrismBinarySensor(PrismBaseEntity, BinarySensorEntity):
         """Init Prism select."""
         super().__init__(entry_data, "binary_sensor", description)
         self._attr_is_on = False
-        self._unsubscribe = None
 
-    async def _subscribe_topic(self):
-        """Subscribe to mqtt topic."""
-        _LOGGER.debug("_subscribe_topic: %s", self._topic)
-        self._unsubscribe = await self.hass.components.mqtt.async_subscribe(
-            self._topic, self.message_received
-        )
-
-    async def _unsubscribe_topic(self):
-        """Unsubscribe to mqtt topic."""
-        _LOGGER.debug("_unsubscribe_topic: %s", self._topic)
-        if self._unsubscribe is not None:
-            await self._unsubscribe()
-
+    @override
     def _message_received(self, msg) -> None:
         """Update the sensor with the most recent event."""
         _LOGGER.debug(
@@ -96,13 +83,8 @@ class PrismBinarySensor(PrismBaseEntity, BinarySensorEntity):
             self._attr_is_on = True
             self.schedule_update_ha_state()
 
-    def message_received(self, msg) -> None:
-        """Update the sensor with the most recent event."""
-        self.hass.loop.call_soon_threadsafe(self._message_received, msg)
-
     async def async_added_to_hass(self) -> None:
         """Subscribe to mqtt."""
-        _LOGGER.debug("async_added_to_hass")
         await self._subscribe_topic()
 
     async def async_will_remove_from_hass(self) -> None:
