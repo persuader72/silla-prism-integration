@@ -50,7 +50,7 @@ class PrismNumber(PrismBaseEntity, NumberEntity):
     ) -> None:
         """Init Prism select."""
         super().__init__(entry_data, "number", description)
-        self._topic_out = description.topic_out
+        self._topic_out = entry_data.topic + description.topic_out
         self._attr_native_value = self.native_min_value
 
     @override
@@ -95,7 +95,7 @@ NUMBERS: tuple[PrismNumberEntityDescription, ...] = (
     PrismNumberEntityDescription(
         key="set_max_current",
         topic="1/user_amp",
-        topic_out="set_current_user",
+        topic_out="1/command/set_current_user",
         entity_category=EntityCategory.CONFIG,
         device_class=NumberDeviceClass.CURRENT,
         native_min_value=6,
@@ -107,7 +107,7 @@ NUMBERS: tuple[PrismNumberEntityDescription, ...] = (
     PrismNumberEntityDescription(
         key="set_current_limit",
         topic="1/pilot",
-        topic_out="set_current_limit",
+        topic_out="1/command/set_current_limit",
         entity_category=EntityCategory.CONFIG,
         device_class=NumberDeviceClass.CURRENT,
         native_min_value=6,

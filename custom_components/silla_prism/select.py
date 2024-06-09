@@ -48,6 +48,7 @@ class PrismSelect(PrismBaseEntity, SelectEntity):
     ) -> None:
         """Init Prism select."""
         super().__init__(entry_data, "select", description)
+        self._topic_out = entry_data.topic + description.topic_out
         self._attr_current_option = "normal"
 
     @override
@@ -82,9 +83,15 @@ class PrismSelect(PrismBaseEntity, SelectEntity):
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""
         _LOGGER.debug(
-            "async_select_option: %s(%d)", option, self.options.index(option) + 1
+            "async_select_option: key:%s topic:%s %s(%d)",
+            self.entity_description.key,
+            self._topic_out,
+            option,
+            self.options.index(option) + 1,
         )
-        await mqtt.async_publish(self.hass, self._topic, self.options.index(option) + 1)
+        await mqtt.async_publish(
+            self.hass, self._topic_out, self.options.index(option) + 1
+        )
 
 
 SELECTS: tuple[PrismSelectEntityDescription, ...] = (
