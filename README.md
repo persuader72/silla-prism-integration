@@ -29,24 +29,27 @@ Prerequisites: A working MQTT server.
 
 ## Entities
 
-| Topic                       | Desription                                                   | Entity      | Unit                                   |
-| --------------------------- | ------------------------------------------------------------ | ----------- | -------------------------------------- |
-| ?/1/state                   | Current state of Prism                                       | Sensor      | "idle", "waiting", "charging", "pause" |
-| ?/1/volt                    | Measured voltage from grid                                   | Sensor      | V                                      |
-| ?/1/w                       | Power provided to the charging port                          | Sensor      | W                                      |
-| ?/1/amp                     | Current provided to the charging port                        | Sensor      | mA                                     |
-| ?/1/pilot                   | Current driven by the car                                    | Sensor      | A                                      |
-| ?/1/user_amp                | Current limit set by user                                    | Sensor      | A                                      |
-| ?/1/session_time            | Duration of the current session                              | Sensor      | s                                      |
-| ?/1/wh                      | Energy provided to the charging port during the current session | Sensor      | Wh                                     |
-| ?/1/wh_total                | Total energy                                                 | Sensor      | Wh                                     |
-| ?/1/error                   | Error code                                                   | (TODO)      |                                        |
-| ?/1/mode                    | Current port mode                                            | Sensor      |                                        |
-| ?/1/input/touch             | Touch button sequence events                                 | BinarySenor | single,double,long events              |
-| ?/energy_data/power_grid    | Input power from grid                                        | Sensor      | W                                      |
-| ?/command/set_mode          | Set the working mode                                         | Select      | Solar,Normal,Paused                    |
-| ?/command/set_current_user  | Set the user current limit                                   | Number      | A                                      |
-| ?/command/set_current_limit | Set the  current limit                                       | Number      | A                                      |
+|                                   |              |                                                              |                                        |
+| --------------------------------- | ------------ | ------------------------------------------------------------ | -------------------------------------- |
+| silla_prism_online                | BinarySensor | Sesnor to find is wallbox is connected or not                |                                        |
+| silla_prism_current_state         | Sensor       | Current state of Prism                                       | "idle", "waiting", "charging", "pause" |
+| silla_prism_power_grid_voltage    | Sensor       | Measured voltage from grid                                   | V                                      |
+| silla_prism_output_power          | Sensor       | Power provided to the charging port                          | W                                      |
+| silla_prism_output_current        | Sensor       | Current provided to the charging port                        | mA                                     |
+| silla_prism_output_car_current    | Sensor       | Current driven by the car                                    | A                                      |
+| silla_prism_current_set_by_user   | Sensor       | Current limit set by user                                    | A                                      |
+| silla_prism_session_time          | Sensor       | Duration of the current session                              | s                                      |
+| silla_prism_session_output_energy | Sensor       | Energy provided to the charging port during the current session | Wh                                     |
+| silla_prism_total_output_energy   | Sensor       | Total energy                                                 | Wh                                     |
+| ?/1/error                         | (TODO)       | Error code                                                   |                                        |
+| silla_prism_current_port_mode     | Sensor       | Current port mode                                            | solar,normal,paused                    |
+| silla_prism_input_grid_power      | Sensor       | Input power from grid                                        | W                                      |
+| silla_prism_set_max_current       | Number       | Set the user current limit                                   | A                                      |
+| silla_prism_set_current_limit     | Number       | Set the  current limit                                       | A                                      |
+| silla_prism_set_mode              | Select       | Set current port mode                                        | solar,normal,paused                    |
+| silla_prism_touch_sigle           | BinarySensor | Goes on for 1 second after a single touch gesture            | On,Off                                 |
+| silla_prism_touch_double          | BinarySensor | Goes on for 1 second after a double touch gesture            | On,Off                                 |
+| silla_prism_touch_long            | BinarySensor | Goes on for 1 second after a long touch gesture              | On,Off                                 |
 
 ## Charger Card Integragtion
 
@@ -74,12 +77,10 @@ condition:
     entity_id: sensor.silla_prism_current_state
     state: pause
 action:
-  - service: mqtt.publish
+  - service: select.set_option
     data:
-      qos: "0"
-      retain: true
-      topic: prism/1/command/set_mode
-      payload: "2"
+      entity_id: select.silla_prism_set_mode
+      option: normal
 mode: single
 ```
 
@@ -99,13 +100,10 @@ condition:
     entity_id: sensor.silla_prism_current_state
     state: charging
 action:
-  - service: mqtt.publish
-    metadata: {}
+  - service: select.set_option
     data:
-      qos: "0"
-      retain: true
-      topic: prism/1/command/set_mode
-      payload: "3"
+      entity_id: select.silla_prism_set_mode
+      option: paused
 mode: single
 ```
 
@@ -114,7 +112,4 @@ mode: single
 ## TODO
 
 1. Translations (English)
-2. Expire non sensor entities
-3. Mixed Italian and English in code and documentation.
-4. Resolve TODOs in code
-5. Handle input touch button
+2. Resolve TODOs in code

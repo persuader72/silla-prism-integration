@@ -44,32 +44,38 @@ details:
       icon: mdi:speedometer
   group1:
     - entity_id: sensor.silla_prism_current_set_by_user
-      text: User limited currnt
-      service: mqtt.publish
+      text: User limited current
+      service: number.set_value
       service_data:
-        topic: prism/1/command/set_current_user
-        payload: '#SERVICEVAL#'
+        entity_id: number.silla_prism_set_max_current
+        value: '#SERVICEVAL#'
+    - entity_id: sensor.wallbox_prism_corrente_pilotata_dall_auto
+      text: Limited current
+      service: number.set_value
+      service_data:
+        entity_id: number.silla_prism_set_current_limit
+        value: '#SERVICEVAL#'
   toolbar_left:
     default:
       - {}
     pause:
-      - service: mqtt.publish
+      - service: select.select_option
         service_data:
-          topic: prism/1/command/set_mode
-          payload: 2
+          entity_id: select.silla_prism_set_mode
+          option: normal
         text: Normal
         icon: hass:play
-      - service: mqtt.publish
+      - service: select.select_option
         service_data:
-          topic: prism/1/command/set_mode
-          payload: 1
+          entity_id: select.silla_prism_set_mode
+          option: solar
         text: Solar
         icon: hass:play
     charging:
-      - service: mqtt.publish
+      - service: select.select_option
         service_data:
-          topic: prism/1/command/set_mode
-          payload: 3
+          entity_id: select.silla_prism_set_mode
+          option: paused
         text: Pause
         icon: hass:pause
   toolbar_right:
