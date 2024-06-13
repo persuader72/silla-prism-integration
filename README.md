@@ -1,18 +1,16 @@
 #  # Silla Prism Solar custom integration
 
-**Warning**: This repository is in a early stage. And is not yet stable.
-
 ![Silla Prism Solar](image.png)
 
-This repository contains a custom integration to integrate a Silla Prism Wallbox inside HomeAssistant
+This repository contains a custom integration to integrate a Silla Prism EVSE inside HomeAssistant
 
 ## Installation
 
 Prerequisites: A working MQTT server.
 
-1) Configure the Prism Wallbox to work with your MQTT server  [has shown in manual](https://support.silla.industries/wp-content/uploads/2023/09/DOC-Prism_MQTT_Manual-rel.2.0_rev.-20220105-EN.pdf).
+1) Configure the Prism EVSE to work with your MQTT server  [has shown in manual](https://support.silla.industries/wp-content/uploads/2023/09/DOC-Prism_MQTT_Manual-rel.2.0_rev.-20220105-EN.pdf).
 2) Configure and enable the [MQTT integration](https://www.home-assistant.io/integrations/mqtt/) for HomeAssistant
-3) Install the custom integration from this repository [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Stefano+Pagnottelli&repository=https%3A%2F%2Fgithub.com%2Fpersuader72%2Fsilla-prism-integration.git&category=integration)
+3) Install the custom integration from this repository [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?category=integration&repository=https%3A%2F%2Fgithub.com%2Fpersuader72%2Fsilla-prism-integration&owner=Stefano+Pagnottelli)
 
 ## Usage
 
@@ -31,7 +29,7 @@ Prerequisites: A working MQTT server.
 
 |                                   |              |                                                              |                                        |
 | --------------------------------- | ------------ | ------------------------------------------------------------ | -------------------------------------- |
-| silla_prism_online                | BinarySensor | Sesnor to find is wallbox is connected or not                |                                        |
+| silla_prism_online                | BinarySensor | Sensor to find if Prism is connected or not                  |                                        |
 | silla_prism_current_state         | Sensor       | Current state of Prism                                       | "idle", "waiting", "charging", "pause" |
 | silla_prism_power_grid_voltage    | Sensor       | Measured voltage from grid                                   | V                                      |
 | silla_prism_output_power          | Sensor       | Power provided to the charging port                          | W                                      |
@@ -61,7 +59,7 @@ It's possible to configure the [EV Charger Card](https://github.com/tmjo/charger
 
 This are some example automations for the touch button events
 
-### Start charge after single touch event if the wallbox is in pause state
+### Start charge after single touch event if Prism is in pause state
 
 ```yaml
 alias: Avvia ricarica dopo pressione pulsante
@@ -84,7 +82,7 @@ action:
 mode: single
 ```
 
-### Stop charge after single touch event if the wallbox is in charging state
+### Stop charge after single touch event if Prism is in charging state
 
 ```yaml
 alias: Interrompi ricarica dopo pressione pulsante
@@ -108,8 +106,3 @@ mode: single
 ```
 
 
-
-## TODO
-
-1. Translations (English)
-2. Resolve TODOs in code
