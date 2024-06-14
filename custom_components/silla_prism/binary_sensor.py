@@ -140,7 +140,6 @@ BINARYSENSORS = [
     PrismBinarySensorEntityDescription(
         key="online",
         topic="energy_data/power_grid",
-        entity_category=EntityCategory.DIAGNOSTIC,
         device_class=BinarySensorDeviceClass.CONNECTIVITY,
         has_entity_name=True,
         translation_key="online",

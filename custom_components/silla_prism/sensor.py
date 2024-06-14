@@ -122,7 +122,7 @@ class PrismGriEnergy(SensorEntity, RestoreEntity):
 
 
 class PrismSensor(PrismBaseEntity, SensorEntity):
-    """A Sensor for Prism wallbox devices."""
+    """A Sensor for Prism EBSE devices."""
 
     entity_description: PrismSensorEntityDescription
 
@@ -178,10 +178,6 @@ class PrismSensor(PrismBaseEntity, SensorEntity):
             self._attr_native_value = msg.payload
         # Schedule update ha state
         self.schedule_update_ha_state()
-
-    def message_received(self, msg) -> None:
-        """Update the sensor with the most recent event."""
-        self.hass.loop.call_soon_threadsafe(self._message_received, msg)
 
     async def async_added_to_hass(self) -> None:
         """Subscribe to mqtt."""

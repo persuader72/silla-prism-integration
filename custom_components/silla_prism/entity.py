@@ -47,8 +47,6 @@ class PrismBaseEntity(Entity):
             model="Prism",
         )
         # Preload attributes
-        if not description.entity_category:
-            self._attr_entity_category = EntityCategory.DIAGNOSTIC
         self.entity_id = ENTITY_ID_SENSOR_FORMAT.format(sensor_domain, description.key)
         self._attr_unique_id = "prism_" + description.key + "_001"
         self.entity_description = description
