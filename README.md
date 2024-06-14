@@ -27,7 +27,7 @@ Prerequisites: A working MQTT server.
 
 ## Entities
 
-|                                   |              |                                                              |                                        |
+| Entity ID                         | Type         | Description                                                  | Unit                                   |
 | --------------------------------- | ------------ | ------------------------------------------------------------ | -------------------------------------- |
 | silla_prism_online                | BinarySensor | Sensor to find if Prism is connected or not                  |                                        |
 | silla_prism_current_state         | Sensor       | Current state of Prism                                       | "idle", "waiting", "charging", "pause" |
@@ -48,6 +48,18 @@ Prerequisites: A working MQTT server.
 | silla_prism_touch_sigle           | BinarySensor | Goes on for 1 second after a single touch gesture            | On,Off                                 |
 | silla_prism_touch_double          | BinarySensor | Goes on for 1 second after a double touch gesture            | On,Off                                 |
 | silla_prism_touch_long            | BinarySensor | Goes on for 1 second after a long touch gesture              | On,Off                                 |
+
+## Computed Entities
+
+Computed entities are not directly measured from Prism but are derived from other measurements. 
+
+| Entity ID                     | Type   | Description                  | Unit |
+| ----------------------------- | ------ | ---------------------------- | ---- |
+| silla_prism_input_grid_energy | Sensor | Total energy taken from grid | Wh   |
+|                               |        |                              |      |
+|                               |        |                              |      |
+
+
 
 ## Charger Card Integragtion
 
@@ -104,5 +116,4 @@ action:
       option: paused
 mode: single
 ```
-
 
