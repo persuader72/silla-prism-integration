@@ -73,9 +73,6 @@ class PrismBinarySensor(PrismBaseEntity, BinarySensorEntity):
     @override
     def _message_received(self, msg) -> None:
         """Update the sensor with the most recent event."""
-        _LOGGER.debug(
-            "PrismBinarySensor._message_received %s %s", self._topic, msg.payload
-        )
         self.schedule_expiration_callback()
 
         # Handle online presence
@@ -112,9 +109,6 @@ class PrismEventBinarySensor(PrismBinarySensor):
 
     def _message_received(self, msg) -> None:
         """Update the sensor with the most recent event."""
-        _LOGGER.debug(
-            "PrismEventBinarySensor._message_received %s %s", self._topic, msg.payload
-        )
         self.schedule_expiration_callback()
 
         # Handle input touch button

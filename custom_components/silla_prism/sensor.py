@@ -81,7 +81,7 @@ class PrismSensor(PrismBaseEntity, SensorEntity):
 
     def _message_received(self, msg) -> None:
         """Update the sensor with the most recent event."""
-        _LOGGER.debug("_message_received %s %s", self._topic, msg.payload)
+        # _LOGGER.debug("_message_received %s %s", self._topic, msg.payload)
         if self._expire_after is not None and self._expire_after > 0:
             # When self._expire_after is set, and we receive a message, assume
             # device is not expired since it has to be to receive the message
@@ -110,7 +110,7 @@ class PrismSensor(PrismBaseEntity, SensorEntity):
 
     async def async_added_to_hass(self) -> None:
         """Subscribe to mqtt."""
-        _LOGGER.debug("async_added_to_hass")
+        # _LOGGER.debug("async_added_to_hass")
         self._attr_available = False
         await self._subscribe_topic()
 

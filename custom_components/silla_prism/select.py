@@ -55,12 +55,6 @@ class PrismSelect(PrismBaseEntity, SelectEntity):
     @override
     def _message_received(self, msg) -> None:
         """Update the sensor with the most recent event."""
-        _LOGGER.debug(
-            "_message_received key:%s topic:%s payload:%s",
-            self.entity_description.key,
-            self._topic,
-            msg.payload,
-        )
         try:
             _sel = int(msg.payload) - 1
             if _sel >= 0 and _sel < len(self.options):

@@ -56,12 +56,6 @@ class PrismNumber(PrismBaseEntity, NumberEntity):
     @override
     def _message_received(self, msg) -> None:
         """Update the sensor with the most recent event."""
-        _LOGGER.debug(
-            "_message_received key:%s topic:%s payload:%s",
-            self.entity_description.key,
-            self._topic,
-            msg.payload,
-        )
         self._attr_native_value = msg.payload
         self.schedule_update_ha_state()
 
