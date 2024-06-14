@@ -64,6 +64,7 @@ class PrismGriEnergy(SensorEntity, RestoreEntity):
     def __init__(
         self, entry_data: RuntimeEntryData, description: SensorEntityDescription
     ) -> None:
+        self._attr_device_info = entry_data.device
         self.entity_id = ENTITY_ID_SENSOR_FORMAT.format(DOMAIN, description.key)
         self.entity_description = description
         self._attr_unique_id = "prism_" + description.key + "_001"
@@ -314,6 +315,7 @@ VSENSORS: List[SensorEntityDescription] = [
         device_class=SensorDeviceClass.ENERGY,
         state_class=SensorStateClass.TOTAL_INCREASING,
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
+        has_entity_name=True,
         translation_key="input_grid_energy",
     )
 ]

@@ -3,7 +3,6 @@
 from datetime import datetime
 import logging
 
-from homeassistant.const import EntityCategory
 from homeassistant.core import CALLBACK_TYPE, callback
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity import Entity, EntityDescription
@@ -40,12 +39,7 @@ class PrismBaseEntity(Entity):
         """Initialize the device info and set the update coordinator."""
         self._topic = entry_data.topic + description.topic
         # Create device instance
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, "SillaPrism001")},
-            name="Prism",
-            manufacturer="Silla",
-            model="Prism",
-        )
+        self._attr_device_info = entry_data.device
         # Preload attributes
         self.entity_id = ENTITY_ID_SENSOR_FORMAT.format(sensor_domain, description.key)
         self._attr_unique_id = "prism_" + description.key + "_001"
