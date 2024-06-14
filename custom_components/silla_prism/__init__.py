@@ -9,7 +9,7 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv
 
-from .const import CONF_TOPIC, DOMAIN
+from .const import CONF_TOPIC, CONF_VSENSORS, DOMAIN
 from .domain_data import DomainData
 from .entry_data import RuntimeEntryData
 
@@ -22,8 +22,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up the Silla Prism component."""
     _LOGGER.debug("async_setup_entry for Silla Prism")
     _topic = entry.data[CONF_TOPIC]
+    _vsensors = entry.data[CONF_VSENSORS]
     domain_data = DomainData.get(hass)
-    entry_data = RuntimeEntryData(topic=_topic)
+    entry_data = RuntimeEntryData(topic=_topic, vsensors=_vsensors)
     domain_data.set_entry_data(entry, entry_data)
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True

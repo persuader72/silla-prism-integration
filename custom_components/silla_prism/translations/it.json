@@ -15,10 +15,11 @@
         "step": {
             "user": {
                 "data": {
-                    "topic": "Topic"
+                    "topic": "Topic",
+                    "vsensors": "Abilita sensori virtuali"
                 },
-                "description": "Please enter connection settings of your",
-                "title": "Configure Silla Prsim"
+                "description": "Inseire i dettagli della connessione al dispositivo",
+                "title": "Configurazione Silla Prsim"
             }
         }
     },
@@ -80,6 +81,9 @@
             },
             "total_output_energy": {
                 "name": "Energia erogata totale"
+            },
+            "input_grid_energy": {
+                "name": "Energia totale dalla rete"
             }
         }
     },

@@ -1,7 +1,6 @@
 """Silla Prism for Home Assistant."""
 
 import asyncio
-from collections import OrderedDict
 import logging
 from typing import Any
 
@@ -9,10 +8,18 @@ import voluptuous as vol
 
 from homeassistant.components import mqtt
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
+from homeassistant.helpers import config_validation as cv
 
-from .const import CONF_TOPIC, DEFAULT_TOPIC, DOMAIN
+from .const import CONF_TOPIC, CONF_VSENSORS, DEFAULT_TOPIC, DEFAULT_VSENSORS, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
+
+SILLA_PRISM_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_TOPIC, default=DEFAULT_TOPIC): cv.string,
+        vol.Optional(CONF_VSENSORS, default=DEFAULT_VSENSORS): cv.boolean,
+    }
+)
 
 
 class SillaPrismConfigFlow(ConfigFlow, domain=DOMAIN):
@@ -24,6 +31,7 @@ class SillaPrismConfigFlow(ConfigFlow, domain=DOMAIN):
     def __init__(self) -> None:
         """Initialize flow."""
         self._topic: str | None = DEFAULT_TOPIC
+        self._vsensors: bool = DEFAULT_VSENSORS
 
     async def fetch_device_info(self) -> str | None:
         """Fetech information from MQTT."""
@@ -53,10 +61,8 @@ class SillaPrismConfigFlow(ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             _LOGGER.debug("Called with user input: %s", user_input)
             self._topic = user_input[CONF_TOPIC]
+            self._vsensors = user_input[CONF_VSENSORS]
             return await self._async_try_fetch_device_info()
-
-        fields: dict[Any, type] = OrderedDict()
-        fields[vol.Required(CONF_TOPIC, default=self._topic or vol.UNDEFINED)] = str
 
         errors = {}
         if error is not None:
@@ -64,7 +70,7 @@ class SillaPrismConfigFlow(ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="user",
-            data_schema=vol.Schema(fields),
+            data_schema=SILLA_PRISM_SCHEMA,
             errors=errors,
         )
 
@@ -86,9 +92,7 @@ class SillaPrismConfigFlow(ConfigFlow, domain=DOMAIN):
         return await self._async_step_user_base(error=error)
 
     async def _async_get_entry(self) -> ConfigFlowResult:
-        config_data = {
-            CONF_TOPIC: self._topic,
-        }
+        config_data = {CONF_TOPIC: self._topic, CONF_VSENSORS: self._vsensors}
         return self.async_create_entry(
             title="SillaPrism",
             data=config_data,

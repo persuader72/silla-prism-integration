@@ -1,7 +1,10 @@
 """Contains sensors exposed by the Prism wallbox integration."""
 
+from contextlib import suppress
 from datetime import datetime
+from decimal import Decimal
 import logging
+from typing import List
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -11,19 +14,24 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
+    STATE_UNAVAILABLE,
+    STATE_UNKNOWN,
     UnitOfElectricCurrent,
     UnitOfElectricPotential,
     UnitOfEnergy,
     UnitOfPower,
     UnitOfTime,
 )
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import Event, EventStateChangedData, HomeAssistant, callback
 from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.event import async_call_later
+from homeassistant.helpers.event import async_call_later, async_track_state_change_event
+from homeassistant.helpers.restore_state import RestoreEntity
+
+from .const import DOMAIN
 
 from .domain_data import DomainData
-from .entity import PrismBaseEntity
+from .entity import ENTITY_ID_SENSOR_FORMAT, PrismBaseEntity
 from .entry_data import RuntimeEntryData
 
 _LOGGER = logging.getLogger(__name__)
@@ -36,6 +44,7 @@ async def async_setup_entry(
     entry_data: RuntimeEntryData = DomainData.get(hass).get_entry_data(entry)
     _LOGGER.debug("async_setup_entry for sensors: %s", entry_data)
     sensors = [PrismSensor(entry_data, description) for description in SENSORS]
+    sensors.append(PrismGriEnergy(entry_data, VSENSORS[0]))
     async_add_entities(sensors)
 
 
@@ -44,6 +53,72 @@ class PrismSensorEntityDescription(SensorEntityDescription, frozen_or_thawed=Tru
 
     expire_after: float = 600
     topic: str = None
+
+
+class PrismGriEnergy(SensorEntity, RestoreEntity):
+    """A Sensor that compute the integral of energy take from grid."""
+
+    _attr_should_poll = False
+    _attr_translation_key = "input_grid_energy"
+
+    def __init__(
+        self, entry_data: RuntimeEntryData, description: SensorEntityDescription
+    ) -> None:
+        self.entity_id = ENTITY_ID_SENSOR_FORMAT.format(DOMAIN, description.key)
+        self.entity_description = description
+        self._attr_unique_id = "prism_" + description.key + "_001"
+        self._integral: Decimal = Decimal(0)
+
+    async def async_added_to_hass(self) -> None:
+        """Called when sensor is added to hass"""
+        _LOGGER.debug("async_added_to_hass %s", self.entity_description.key)
+        await super().async_internal_added_to_hass()
+
+        if state := await self.async_get_last_state():
+            _LOGGER.debug("async_added_to_hass last state %s", state)
+            if state.state not in (STATE_UNAVAILABLE, STATE_UNKNOWN):
+                with suppress(ValueError):
+                    self._integral = Decimal(state.state)
+                    self._attr_native_value = round(self._integral, 1)
+            else:
+                _LOGGER.warning(
+                    "async_added_to_hass can't restore state of %s",
+                    self.entity_description.key,
+                )
+
+        self.async_on_remove(
+            async_track_state_change_event(
+                self.hass, "sensor.silla_prism_input_grid_power", self._calc_integral
+            )
+        )
+
+    @callback
+    def _calc_integral(self, event: Event[EventStateChangedData]) -> None:
+        """Handle the sensor state changes."""
+        old_state = event.data["old_state"]
+        new_state = event.data["new_state"]
+
+        if old_state.state in (STATE_UNKNOWN, STATE_UNAVAILABLE) or new_state.state in (
+            STATE_UNKNOWN,
+            STATE_UNAVAILABLE,
+        ):
+            if self._attr_available:
+                self._attr_available = False
+                self.async_write_ha_state()
+            return
+
+        elapsed_time = Decimal(
+            (new_state.last_updated - old_state.last_updated).total_seconds() / 3600
+        )
+        average_value = (Decimal(new_state.state) + Decimal(old_state.state)) / Decimal(
+            2
+        )
+        self._integral += elapsed_time * average_value
+        self._attr_native_value = round(self._integral, 1)
+
+        if not self._attr_available:
+            self._attr_available = True
+        self.async_write_ha_state()
 
 
 class PrismSensor(PrismBaseEntity, SensorEntity):
@@ -236,3 +311,13 @@ SENSORS: tuple[PrismSensorEntityDescription, ...] = (
         translation_key="input_grid_power",
     ),
 )
+
+VSENSORS: List[SensorEntityDescription] = [
+    SensorEntityDescription(
+        key="input_grid_energy",
+        device_class=SensorDeviceClass.ENERGY,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
+        translation_key="input_grid_energy",
+    )
+]

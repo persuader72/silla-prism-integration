@@ -15,7 +15,8 @@
         "step": {
             "user": {
                 "data": {
-                    "topic": "Topic"
+                    "topic": "Topic",
+                    "vsensors": "Enable virtual sensors"
                 },
                 "description": "Please enter connection settings of your",
                 "title": "Configure Silla Prsim Integration"
@@ -80,6 +81,9 @@
             },
             "total_output_energy": {
                 "name": "Total energy"
+            },
+            "input_grid_energy": {
+                "name": "Total energy from grid"
             }
         }
     },
