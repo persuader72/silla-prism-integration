@@ -140,6 +140,8 @@ class PrismSensor(PrismBaseEntity, SensorEntity):
     entity_description: PrismSensorEntityDescription
 
     def description(self, port: int, mulitport: bool, description: PrismSensorEntityDescription) -> PrismSensorEntityDescription:
+        if port == 0:
+            return description
         if mulitport:
             return PrismSensorEntityDescription(
                 key=description.key.format(port),
