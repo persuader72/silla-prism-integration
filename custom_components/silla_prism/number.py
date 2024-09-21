@@ -26,8 +26,15 @@ async def async_setup_entry(
     """Add entities for passed config_entry in HA."""
     entry_data: RuntimeEntryData = DomainData.get(hass).get_entry_data(entry)
     _LOGGER.debug("async_setup_entry for numbers: %s", entry_data)
-    selects = [PrismNumber(entry_data, description) for description in NUMBERS]
-    async_add_entities(selects)
+
+    ports = entry_data.ports
+    numbers = []
+
+    for port in range(1, ports+1):
+        for description in NUMBERS:
+            numbers.append(PrismNumber(entry_data, description, port))
+
+    async_add_entities(numbers)
 
 
 class PrismNumberEntityDescription(NumberEntityDescription, frozen_or_thawed=True):
@@ -43,13 +50,45 @@ class PrismNumber(PrismBaseEntity, NumberEntity):
 
     entity_description: PrismNumberEntityDescription
 
+    def description(self, port: int, mulitport: bool, description: PrismNumberEntityDescription) -> PrismNumberEntityDescription:
+        if mulitport:
+            return PrismNumberEntityDescription(
+                key=description.key.format(port),
+                topic=description.topic.format(port),
+                entity_category=description.entity_category,
+                device_class=description.device_class,
+                native_min_value=description.native_min_value,
+                native_max_value=description.native_max_value,
+                mode=description.mode,
+                has_entity_name=description.has_entity_name,
+                translation_key=description.translation_key,
+            )
+        else:
+            return PrismNumberEntityDescription(
+                key=description.key[:-3],
+                topic=description.topic.format(port),
+                entity_category=description.entity_category,
+                device_class=description.device_class,
+                native_min_value=description.native_min_value,
+                native_max_value=description.native_max_value,
+                mode=description.mode,
+                has_entity_name=description.has_entity_name,
+                translation_key=description.translation_key,
+            )
+
     def __init__(
         self,
         entry_data: RuntimeEntryData,
         description: PrismNumberEntityDescription,
+        port: int
     ) -> None:
         """Init Prism select."""
-        super().__init__(entry_data, "number", description)
+        ismultiport = entry_data.ports > 1
+        if not ismultiport:
+            device = entry_data.devices[0]
+        else:
+            device = entry_data.devices[port]
+        super().__init__(entry_data, "number", self.description(port, ismultiport, description), device)
         self._topic_out = entry_data.topic + description.topic_out
         self._attr_native_value = self.native_min_value
 
@@ -87,9 +126,9 @@ class PrismNumber(PrismBaseEntity, NumberEntity):
 
 NUMBERS: tuple[PrismNumberEntityDescription, ...] = (
     PrismNumberEntityDescription(
-        key="set_max_current",
-        topic="1/user_amp",
-        topic_out="1/command/set_current_user",
+        key="set_max_current_port_{}",
+        topic="{}/user_amp",
+        topic_out="{}/command/set_current_user",
         entity_category=EntityCategory.CONFIG,
         device_class=NumberDeviceClass.CURRENT,
         native_min_value=6,
@@ -99,9 +138,9 @@ NUMBERS: tuple[PrismNumberEntityDescription, ...] = (
         translation_key="set_max_current",
     ),
     PrismNumberEntityDescription(
-        key="set_current_limit",
-        topic="1/pilot",
-        topic_out="1/command/set_current_limit",
+        key="set_current_limit_port_{}",
+        topic="{}/pilot",
+        topic_out="{}/command/set_current_limit",
         entity_category=EntityCategory.CONFIG,
         device_class=NumberDeviceClass.CURRENT,
         native_min_value=6,

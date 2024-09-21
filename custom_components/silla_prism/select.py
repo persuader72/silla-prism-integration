@@ -25,7 +25,12 @@ async def async_setup_entry(
     """Add entities for passed config_entry in HA."""
     entry_data: RuntimeEntryData = DomainData.get(hass).get_entry_data(entry)
     _LOGGER.debug("async_setup_entry for sensors: %s", entry_data)
-    selects = [PrismSelect(entry_data, description) for description in SELECTS]
+
+    ports = entry_data.ports
+    selects = []
+    for port in range(1, ports+1):
+        for description in SELECTS:
+            selects.append(PrismSelect(entry_data, description, port))
     async_add_entities(selects)
 
 
@@ -42,14 +47,47 @@ class PrismSelect(PrismBaseEntity, SelectEntity):
 
     entity_description: PrismSelectEntityDescription
 
+    def description(self, port: int, mulitport: bool, description: PrismSelectEntityDescription) -> PrismSelectEntityDescription:
+        if not mulitport:
+            return PrismSelectEntityDescription(
+                key=description.key.format(port),
+                topic=description.topic.format(port),
+                entity_category=description.entity_category,
+                device_class=description.device_class,
+                options=description.options,
+                has_entity_name=description.has_entity_name,
+                translation_key=description.translation_key,
+                topic_out=description.topic_out.format(port),
+            )
+        else:
+            return PrismSelectEntityDescription(
+                key=description.key[0:-3],
+                topic=description.topic.format(port),
+                entity_category=description.entity_category,
+                device_class=description.device_class,
+                options=description.options,
+                has_entity_name=description.has_entity_name,
+                translation_key=description.translation_key,
+                topic_out=description.topic_out.format(port),
+            )
+        
     def __init__(
         self,
         entry_data: RuntimeEntryData,
         description: PrismSelectEntityDescription,
+        port: int
     ) -> None:
         """Init Prism select."""
-        super().__init__(entry_data, "select", description)
-        self._topic_out = entry_data.topic + description.topic_out
+        ismultiport = entry_data.ports > 1
+        if not ismultiport:
+            device = entry_data.devices[0]
+        else:
+            device = entry_data.devices[port]
+        super().__init__(entry_data, "select", self.description(port, ismultiport, description), device)
+        if port == 0:
+            self._topic_out = entry_data.topic + description.topic_out
+        else:
+            self._topic_out = entry_data.topic + description.topic_out.format(port)
         self._attr_current_option = "normal"
 
     @override
@@ -91,9 +129,9 @@ class PrismSelect(PrismBaseEntity, SelectEntity):
 
 SELECTS: tuple[PrismSelectEntityDescription, ...] = (
     PrismSelectEntityDescription(
-        key="set_mode",
-        topic="1/command/set_mode",
-        topic_out="1/command/set_mode",
+        key="set_mode_{}",
+        topic="{}/command/set_mode",
+        topic_out="{}/command/set_mode",
         entity_category=EntityCategory.CONFIG,
         options=["solar", "normal", "paused"],
         has_entity_name=True,

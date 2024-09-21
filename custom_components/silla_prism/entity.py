@@ -7,6 +7,7 @@ from homeassistant.core import CALLBACK_TYPE, callback
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity import Entity, EntityDescription
 from homeassistant.helpers.event import async_call_later
+from homeassistant.components import mqtt
 
 from .entry_data import RuntimeEntryData
 
@@ -35,15 +36,17 @@ class PrismBaseEntity(Entity):
         entry_data: RuntimeEntryData,
         sensor_domain: str,
         description: PrismBaseEntityDescription,
+        device: DeviceInfo
     ) -> None:
         """Initialize the device info and set the update coordinator."""
-        self._topic = entry_data.topic + description.topic
         # Create device instance
-        self._attr_device_info = entry_data.device
+        self._attr_device_info = device
+        self.entity_description = description
+        _LOGGER.debug("sensor entity %s", description.key)
         # Preload attributes
         self.entity_id = ENTITY_ID_SENSOR_FORMAT.format(sensor_domain, description.key)
         self._attr_unique_id = "prism_" + description.key + "_001"
-        self.entity_description = description
+        self._topic = entry_data.topic + description.topic
         # TODO: Put this in config
         self._expire_after = description.expire_after
         # Init expire proceudre
@@ -62,8 +65,10 @@ class PrismBaseEntity(Entity):
     async def _subscribe_topic(self):
         """Subscribe to mqtt topic."""
         _LOGGER.debug("_subscribe_topic: %s", self._topic)
-        self._unsubscribe = await self.hass.components.mqtt.async_subscribe(
-            self._topic, self.message_received
+        self._unsubscribe = await mqtt.async_subscribe(
+            self.hass,
+            self._topic, 
+            self.message_received
         )
 
     def _message_received(self, msg) -> None:

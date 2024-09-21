@@ -16,6 +16,7 @@
             "user": {
                 "data": {
                     "topic": "Topic",
+                    "ports": "Number of available ports",
                     "vsensors": "Enable virtual sensors"
                 },
                 "description": "Please enter connection settings of your",

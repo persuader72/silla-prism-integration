@@ -16,6 +16,7 @@
             "user": {
                 "data": {
                     "topic": "Topic",
+                    "ports": "Numero delle porte disponibili",
                     "vsensors": "Abilita sensori virtuali"
                 },
                 "description": "Inseire i dettagli della connessione al dispositivo",

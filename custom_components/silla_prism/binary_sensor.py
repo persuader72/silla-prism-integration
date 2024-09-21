@@ -30,8 +30,9 @@ async def async_setup_entry(
     """Add entities for passed config_entry in HA."""
     entry_data: RuntimeEntryData = DomainData.get(hass).get_entry_data(entry)
     _LOGGER.debug("async_setup_entry for binary sensors: %s", entry_data)
+    #ports = entry_data.ports
     binsens = [
-        PrismBinarySensor(entry_data, description) for description in BINARYSENSORS
+        PrismBinarySensor(entry_data, description) for description in BASE_BINARYSENSORS
     ]
     evsens = [
         PrismEventBinarySensor(entry_data, description) for description in EVENTSENSORS
@@ -67,7 +68,8 @@ class PrismBinarySensor(PrismBaseEntity, BinarySensorEntity):
         description: PrismBinarySensorEntityDescription,
     ) -> None:
         """Init Prism select."""
-        super().__init__(entry_data, "binary_sensor", description)
+        device = entry_data.devices[0]
+        super().__init__(entry_data, "binary_sensor", description, device)
         self._attr_is_on = False
 
     @override
@@ -136,7 +138,7 @@ class PrismEventBinarySensor(PrismBinarySensor):
         self.async_write_ha_state()
 
 
-BINARYSENSORS = [
+BASE_BINARYSENSORS = [
     PrismBinarySensorEntityDescription(
         key="online",
         topic="energy_data/power_grid",

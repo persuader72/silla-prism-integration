@@ -23,6 +23,7 @@ from homeassistant.const import (
     UnitOfTime,
 )
 from homeassistant.core import Event, EventStateChangedData, HomeAssistant, callback
+from homeassistant.components import mqtt
 from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import async_call_later, async_track_state_change_event
@@ -43,9 +44,16 @@ async def async_setup_entry(
     """Set up all sensors for this entry."""
     entry_data: RuntimeEntryData = DomainData.get(hass).get_entry_data(entry)
     _LOGGER.debug("async_setup_entry for sensors: %s", entry_data)
-    sensors = [PrismSensor(entry_data, description) for description in SENSORS]
+    ports = entry_data.ports
+
+    sensors = []
+    for port in range(1, ports+1):
+        for description in SENSORS:
+            sensors.append(PrismSensor(entry_data, description, port))
+    for description in BASE_SENSORS:
+        sensors.append(PrismSensor(entry_data, description, 0))
     if entry_data.vsensors:
-        sensors.append(PrismGriEnergy(entry_data, VSENSORS[0]))
+        sensors.append(PrismGridEnergy(entry_data, VSENSORS[0]))
     async_add_entities(sensors)
 
 
@@ -56,7 +64,7 @@ class PrismSensorEntityDescription(SensorEntityDescription, frozen_or_thawed=Tru
     topic: str = None
 
 
-class PrismGriEnergy(SensorEntity, RestoreEntity):
+class PrismGridEnergy(SensorEntity, RestoreEntity):
     """A Sensor that compute the integral of energy take from grid."""
 
     _attr_should_poll = False
@@ -65,7 +73,7 @@ class PrismGriEnergy(SensorEntity, RestoreEntity):
     def __init__(
         self, entry_data: RuntimeEntryData, description: SensorEntityDescription
     ) -> None:
-        self._attr_device_info = entry_data.device
+        self._attr_device_info = entry_data.devices[0]
         self.entity_id = ENTITY_ID_SENSOR_FORMAT.format(DOMAIN, description.key)
         self.entity_description = description
         self._attr_unique_id = "prism_" + description.key + "_001"
@@ -100,6 +108,9 @@ class PrismGriEnergy(SensorEntity, RestoreEntity):
         old_state = event.data["old_state"]
         new_state = event.data["new_state"]
 
+        if old_state is None:
+            return
+
         if old_state.state in (STATE_UNKNOWN, STATE_UNAVAILABLE) or new_state.state in (
             STATE_UNKNOWN,
             STATE_UNAVAILABLE,
@@ -124,22 +135,47 @@ class PrismGriEnergy(SensorEntity, RestoreEntity):
 
 
 class PrismSensor(PrismBaseEntity, SensorEntity):
-    """A Sensor for Prism EBSE devices."""
+    """A Sensor for Prism EVSE devices."""
 
     entity_description: PrismSensorEntityDescription
 
+    def description(self, port: int, mulitport: bool, description: PrismSensorEntityDescription) -> PrismSensorEntityDescription:
+        if mulitport:
+            return PrismSensorEntityDescription(
+                key=description.key.format(port),
+                topic=description.topic.format(port),
+                device_class=description.device_class,
+                options=description.options,
+                has_entity_name=description.has_entity_name,
+                translation_key=description.translation_key,
+            )
+        else:
+            return PrismSensorEntityDescription(
+                key=description.key[:-3],
+                topic=description.topic.format(port),
+                device_class=description.device_class,
+                options=description.options,
+                has_entity_name=description.has_entity_name,
+                translation_key=description.translation_key,
+            )
+
     def __init__(
-        self, entry_data: RuntimeEntryData, description: EntityDescription
+        self, entry_data: RuntimeEntryData, description: EntityDescription, port: int
     ) -> None:
         """Init Prism sensor."""
-        super().__init__(entry_data, "sensor", description)
+        ismultiport = entry_data.ports > 1
+        if not ismultiport:
+            device = entry_data.devices[0]
+        else:
+            device = entry_data.devices[port]
+        super().__init__(entry_data, "sensor", self.description(port, ismultiport, description), device)
         self._unsubscribe = None
 
     async def _subscribe_topic(self):
         """Subscribe to mqtt topic."""
         _LOGGER.debug("_subscribe_topic: %s", self._topic)
-        self._unsubscribe = await self.hass.components.mqtt.async_subscribe(
-            self._topic, self.message_received
+        self._unsubscribe = await mqtt.async_subscribe(
+            self.hass, self._topic, self.message_received
         )
 
     async def _unsubscribe_topic(self):
@@ -202,16 +238,16 @@ class PrismSensor(PrismBaseEntity, SensorEntity):
 
 SENSORS: tuple[PrismSensorEntityDescription, ...] = (
     PrismSensorEntityDescription(
-        key="current_state",
-        topic="1/state",
+        key="current_state_{}",
+        topic="{}/state",
         device_class=SensorDeviceClass.ENUM,
         options=["idle", "waiting", "charging", "pause"],
         has_entity_name=True,
         translation_key="current_state",
     ),
     PrismSensorEntityDescription(
-        key="power_grid_voltage",
-        topic="1/volt",
+        key="power_grid_voltage_{}",
+        topic="{}/volt",
         device_class=SensorDeviceClass.VOLTAGE,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfElectricPotential.VOLT,
@@ -220,8 +256,8 @@ SENSORS: tuple[PrismSensorEntityDescription, ...] = (
         translation_key="power_grid_voltage",
     ),
     PrismSensorEntityDescription(
-        key="output_power",
-        topic="1/w",
+        key="output_power_{}",
+        topic="{}/w",
         device_class=SensorDeviceClass.POWER,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfPower.WATT,
@@ -230,8 +266,8 @@ SENSORS: tuple[PrismSensorEntityDescription, ...] = (
         translation_key="output_power",
     ),
     PrismSensorEntityDescription(
-        key="output_current",
-        topic="1/amp",
+        key="output_current_{}",
+        topic="{}/amp",
         device_class=SensorDeviceClass.CURRENT,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfElectricCurrent.MILLIAMPERE,
@@ -240,8 +276,8 @@ SENSORS: tuple[PrismSensorEntityDescription, ...] = (
         translation_key="output_current",
     ),
     PrismSensorEntityDescription(
-        key="output_car_current",
-        topic="1/pilot",
+        key="output_car_current_{}",
+        topic="{}/pilot",
         device_class=SensorDeviceClass.CURRENT,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfElectricCurrent.AMPERE,
@@ -250,8 +286,8 @@ SENSORS: tuple[PrismSensorEntityDescription, ...] = (
         translation_key="output_car_current",
     ),
     PrismSensorEntityDescription(
-        key="current_set_by_user",
-        topic="1/user_amp",
+        key="current_set_by_user_{}",
+        topic="{}/user_amp",
         device_class=SensorDeviceClass.CURRENT,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfElectricCurrent.AMPERE,
@@ -260,8 +296,8 @@ SENSORS: tuple[PrismSensorEntityDescription, ...] = (
         translation_key="current_set_by_user",
     ),
     PrismSensorEntityDescription(
-        key="session_time",
-        topic="1/session_time",
+        key="session_time_{}",
+        topic="{}/session_time",
         device_class=SensorDeviceClass.DURATION,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfTime.SECONDS,
@@ -270,8 +306,8 @@ SENSORS: tuple[PrismSensorEntityDescription, ...] = (
         translation_key="session_time",
     ),
     PrismSensorEntityDescription(
-        key="session_output_energy",
-        topic="1/wh",
+        key="session_output_energy_{}",
+        topic="{}/wh",
         device_class=SensorDeviceClass.ENERGY,
         state_class=SensorStateClass.TOTAL,
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
@@ -280,8 +316,8 @@ SENSORS: tuple[PrismSensorEntityDescription, ...] = (
         translation_key="session_output_energy",
     ),
     PrismSensorEntityDescription(
-        key="total_output_energy",
-        topic="1/wh_total",
+        key="total_output_energy_{}",
+        topic="{}/wh_total",
         device_class=SensorDeviceClass.ENERGY,
         state_class=SensorStateClass.TOTAL_INCREASING,
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
@@ -291,13 +327,16 @@ SENSORS: tuple[PrismSensorEntityDescription, ...] = (
     ),
     # FIXME: suspended is not 4 but 7
     PrismSensorEntityDescription(
-        key="current_port_mode",
-        topic="1/mode",
+        key="current_port_mode_{}",
+        topic="{}/mode",
         device_class=SensorDeviceClass.ENUM,
         options=["solar", "normal", "paused", "suspended"],
         has_entity_name=True,
         translation_key="current_port_mode",
     ),
+)
+
+BASE_SENSORS: tuple[PrismSensorEntityDescription, ...] = (
     PrismSensorEntityDescription(
         key="input_grid_power",
         topic="energy_data/power_grid",
