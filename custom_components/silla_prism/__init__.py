@@ -23,7 +23,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up the Silla Prism component."""
     _LOGGER.debug("async_setup_entry for Silla Prism")
     _topic = entry.data[CONF_TOPIC]
-    _vsensors = entry.data.get(CONF_TOPIC, False)
+    _vsensors = entry.data.get(CONF_TOPIC, True)
     domain_data = DomainData.get(hass)
     _device_info = DeviceInfo(
         identifiers={(DOMAIN, "SillaPrism001")},

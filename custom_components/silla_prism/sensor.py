@@ -44,7 +44,8 @@ async def async_setup_entry(
     entry_data: RuntimeEntryData = DomainData.get(hass).get_entry_data(entry)
     _LOGGER.debug("async_setup_entry for sensors: %s", entry_data)
     sensors = [PrismSensor(entry_data, description) for description in SENSORS]
-    sensors.append(PrismGriEnergy(entry_data, VSENSORS[0]))
+    if entry_data.vsensors:
+        sensors.append(PrismGriEnergy(entry_data, VSENSORS[0]))
     async_add_entities(sensors)
 
 
