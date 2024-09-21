@@ -126,7 +126,7 @@ class PrismNumber(PrismBaseEntity, NumberEntity):
 
 NUMBERS: tuple[PrismNumberEntityDescription, ...] = (
     PrismNumberEntityDescription(
-        key="set_max_current_port_{}",
+        key="set_max_current_{}",
         topic="{}/user_amp",
         topic_out="{}/command/set_current_user",
         entity_category=EntityCategory.CONFIG,
@@ -138,7 +138,7 @@ NUMBERS: tuple[PrismNumberEntityDescription, ...] = (
         translation_key="set_max_current",
     ),
     PrismNumberEntityDescription(
-        key="set_current_limit_port_{}",
+        key="set_current_limit_{}",
         topic="{}/pilot",
         topic_out="{}/command/set_current_limit",
         entity_category=EntityCategory.CONFIG,
