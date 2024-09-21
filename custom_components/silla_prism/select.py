@@ -48,7 +48,7 @@ class PrismSelect(PrismBaseEntity, SelectEntity):
     entity_description: PrismSelectEntityDescription
 
     def description(self, port: int, mulitport: bool, description: PrismSelectEntityDescription) -> PrismSelectEntityDescription:
-        if not mulitport:
+        if mulitport:
             return PrismSelectEntityDescription(
                 key=description.key.format(port),
                 topic=description.topic.format(port),
