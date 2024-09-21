@@ -31,7 +31,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     _devices_info.append(DeviceInfo(
         identifiers={(DOMAIN, "SillaPrism001")},
-        name="Prism EVSE",
+        name="Prism",
         manufacturer="Silla",
         model="Prism",
     ))
