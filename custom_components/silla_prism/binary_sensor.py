@@ -30,14 +30,16 @@ async def async_setup_entry(
     """Add entities for passed config_entry in HA."""
     entry_data: RuntimeEntryData = DomainData.get(hass).get_entry_data(entry)
     _LOGGER.debug("async_setup_entry for binary sensors: %s", entry_data)
-    #ports = entry_data.ports
     binsens = [
-        PrismBinarySensor(entry_data, description) for description in BASE_BINARYSENSORS
+        PrismBinarySensor(entry_data, description, 0) for description in BASE_BINARYSENSORS
     ]
-    evsens = [
-        PrismEventBinarySensor(entry_data, description) for description in EVENTSENSORS
-    ]
-    async_add_entities(binsens + evsens)
+
+    events = []
+    ports = entry_data.ports
+    for port in range(1, ports+1):
+        for description in EVENTSENSORS:
+            events.append(PrismEventBinarySensor(entry_data, description, port))
+    async_add_entities(binsens + events)
 
 
 class PrismBinarySensorEntityDescription(
@@ -66,9 +68,14 @@ class PrismBinarySensor(PrismBaseEntity, BinarySensorEntity):
         self,
         entry_data: RuntimeEntryData,
         description: PrismBinarySensorEntityDescription,
+        port: int,
     ) -> None:
         """Init Prism select."""
-        device = entry_data.devices[0]
+        ismultiport = entry_data.ports > 1
+        if not ismultiport:
+            device = entry_data.devices[0]
+        else:
+            device = entry_data.devices[port]
         super().__init__(entry_data, "binary_sensor", description, device)
         self._attr_is_on = False
 
@@ -100,13 +107,41 @@ class PrismEventBinarySensor(PrismBinarySensor):
 
     entity_description: PrismEventBinarySensorEntityDescription
 
+    def description(self, port: int, mulitport: bool, description: PrismEventBinarySensorEntityDescription) -> PrismEventBinarySensorEntityDescription:
+        if port == 0:
+            return description
+        if mulitport:
+            return PrismEventBinarySensorEntityDescription(
+                key=description.key.format(port),
+                topic=description.topic.format(port),
+                entity_category=description.entity_category,
+                device_class=description.device_class,
+                has_entity_name=description.has_entity_name,
+                sequence=description.sequence,
+                translation_key=description.translation_key,
+                expire_after=description.expire_after,
+            )
+        else:
+            return PrismEventBinarySensorEntityDescription(
+                key=description.key[:-3],
+                topic=description.topic.format(port),
+                entity_category=description.entity_category,
+                device_class=description.device_class,
+                has_entity_name=description.has_entity_name,
+                sequence=description.sequence,
+                translation_key=description.translation_key,
+                expire_after=description.expire_after,
+            )
+
     def __init__(
         self,
         entry_data: RuntimeEntryData,
         description: PrismEventBinarySensorEntityDescription,
+        port: int,
     ) -> None:
         """Init Prism event binary sensor."""
-        super().__init__(entry_data, description)
+        ismultiport = entry_data.ports > 1
+        super().__init__(entry_data, self.description(port, ismultiport, description), port)
         self._sequence: FrozenSet[int] = description.sequence
 
     def _message_received(self, msg) -> None:
@@ -151,8 +186,8 @@ BASE_BINARYSENSORS = [
 
 EVENTSENSORS = [
     PrismEventBinarySensorEntityDescription(
-        key="touch_sigle",
-        topic="1/input/touch",
+        key="touch_sigle_{}",
+        topic="{}/input/touch",
         entity_category=EntityCategory.DIAGNOSTIC,
         device_class=BinarySensorDeviceClass.MOTION,
         has_entity_name=True,
@@ -161,8 +196,8 @@ EVENTSENSORS = [
         expire_after=0,
     ),
     PrismEventBinarySensorEntityDescription(
-        key="touch_double",
-        topic="1/input/touch",
+        key="touch_double_{}",
+        topic="{}/input/touch",
         entity_category=EntityCategory.DIAGNOSTIC,
         device_class=BinarySensorDeviceClass.MOTION,
         has_entity_name=True,
@@ -174,8 +209,8 @@ EVENTSENSORS = [
         expire_after=0,
     ),
     PrismEventBinarySensorEntityDescription(
-        key="touch_long",
-        topic="1/input/touch",
+        key="touch_long_{}",
+        topic="{}/input/touch",
         entity_category=EntityCategory.DIAGNOSTIC,
         device_class=BinarySensorDeviceClass.MOTION,
         has_entity_name=True,
