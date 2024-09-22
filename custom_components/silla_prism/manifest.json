@@ -1,11 +1,15 @@
 {
-  "domain": "silla_prism",
-  "name": "Silla Prism Wallbox",
-  "codeowners": ["@persuader72"],
-  "config_flow": true,
-  "dependencies": ["mqtt"],
-  "documentation": "https://github.com/",
-  "iot_class": "local_polling",
-  "requirements": [],
-  "version": "0.4.0"
-}
+    "domain": "silla_prism",
+    "name": "Silla Prism EVSE",
+    "config_flow": true,
+    "documentation": "https://github.com/persuader72/silla-prism-integration/blob/main/README.md",
+    "issue_tracker": "https://github.com/persuader72/silla-prism-integration/blob/main/README.md",
+    "requirements": [],
+    "ssdp": [],
+    "zeroconf": [],
+    "homekit": {},
+    "dependencies": ["mqtt"],
+    "codeowners": ["@persuader72"],
+    "version": "0.4.0",
+    "iot_class": "local_polling"
+  }
