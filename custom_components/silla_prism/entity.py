@@ -14,7 +14,23 @@ from .entry_data import RuntimeEntryData
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
-ENTITY_ID_SENSOR_FORMAT = "{}." + DOMAIN + "_{}"
+# ENTITY_ID_SENSOR_FORMAT = "{}." + DOMAIN + "_{}"
+
+
+def _get_unique_id(serial: str, key: str) -> str:
+    """Get a unique entity id."""
+    if serial == "":
+        return "prism_" + key + "_001"
+    else:
+        return "prism_{}_{}".format(serial, key)
+
+
+def _get_entity_id(serial: str, entity_type: str, key: str) -> str:
+    """Get a entity id."""
+    if serial == "":
+        return "{}." + DOMAIN + "_{}".format(entity_type, key)
+    else:
+        return "{}." + DOMAIN + "_{}_{}".format(entity_type, serial, key)
 
 
 class PrismBaseEntityDescription(EntityDescription, frozen_or_thawed=True):
@@ -44,8 +60,9 @@ class PrismBaseEntity(Entity):
         self.entity_description = description
         _LOGGER.debug("sensor entity %s", description.key)
         # Preload attributes
-        self.entity_id = ENTITY_ID_SENSOR_FORMAT.format(sensor_domain, description.key)
-        self._attr_unique_id = "prism_" + description.key + "_001"
+        self.entity_id = _get_entity_id(entry_data.serial, sensor_domain, description.key)
+        self._attr_unique_id = _get_unique_id(entry_data.serial, description.key)
+        _LOGGER.debug("entity unique id %s", self._attr_unique_id)
         self._topic = entry_data.topic + description.topic
         # TODO: Put this in config
         self._expire_after = description.expire_after

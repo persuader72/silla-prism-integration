@@ -17,6 +17,7 @@
                 "data": {
                     "topic": "Topic",
                     "ports": "Numero delle porte disponibili",
+                    "serial": "Codice univoco del dispositivo. Usare se si hanno piu' dispositivi",
                     "vsensors": "Abilita sensori virtuali"
                 },
                 "description": "Inseire i dettagli della connessione al dispositivo",

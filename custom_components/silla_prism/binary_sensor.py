@@ -71,6 +71,7 @@ class PrismBinarySensor(PrismBaseEntity, BinarySensorEntity):
         port: int,
     ) -> None:
         """Init Prism select."""
+        _LOGGER.debug("PrismBinarySensor.__init__: %s", entry_data)
         ismultiport = entry_data.ports > 1
         if not ismultiport:
             device = entry_data.devices[0]

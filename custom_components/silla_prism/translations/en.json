@@ -17,9 +17,10 @@
                 "data": {
                     "topic": "Topic",
                     "ports": "Number of available ports",
+                    "serial": "Unique device code. Use if you have multiple devices",
                     "vsensors": "Enable virtual sensors"
                 },
-                "description": "Please enter connection settings of your",
+                "description": "Please enter connection settings of your device",
                 "title": "Configure Silla Prsim Integration"
             }
         }

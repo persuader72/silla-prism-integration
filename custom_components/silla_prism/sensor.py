@@ -5,6 +5,7 @@ from datetime import datetime
 from decimal import Decimal
 import logging
 from typing import List
+from .const import SENSOR_DOMAIN
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -32,7 +33,7 @@ from homeassistant.helpers.restore_state import RestoreEntity
 from .const import DOMAIN
 
 from .domain_data import DomainData
-from .entity import ENTITY_ID_SENSOR_FORMAT, PrismBaseEntity
+from .entity import PrismBaseEntity, _get_unique_id, _get_entity_id
 from .entry_data import RuntimeEntryData
 
 _LOGGER = logging.getLogger(__name__)
@@ -74,9 +75,9 @@ class PrismGridEnergy(SensorEntity, RestoreEntity):
         self, entry_data: RuntimeEntryData, description: SensorEntityDescription
     ) -> None:
         self._attr_device_info = entry_data.devices[0]
-        self.entity_id = ENTITY_ID_SENSOR_FORMAT.format(DOMAIN, description.key)
+        self.entity_id = _get_entity_id(entry_data.serial, SENSOR_DOMAIN, description.key)
         self.entity_description = description
-        self._attr_unique_id = "prism_" + description.key + "_001"
+        self._attr_unique_id = _get_unique_id(entry_data.serial, description.key)
         self._integral: Decimal = Decimal(0)
 
     async def async_added_to_hass(self) -> None:
@@ -176,7 +177,7 @@ class PrismSensor(PrismBaseEntity, SensorEntity):
             device = entry_data.devices[0]
         else:
             device = entry_data.devices[port]
-        super().__init__(entry_data, "sensor", self.description(port, ismultiport, description), device)
+        super().__init__(entry_data, SENSOR_DOMAIN, self.description(port, ismultiport, description), device)
         self._unsubscribe = None
 
     async def _subscribe_topic(self):

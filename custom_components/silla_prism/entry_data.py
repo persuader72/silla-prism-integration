@@ -11,5 +11,6 @@ class RuntimeEntryData:
     topic: str
     ports: int
     vsensors: bool
+    serial: str
     devices: List[DeviceInfo]
 
