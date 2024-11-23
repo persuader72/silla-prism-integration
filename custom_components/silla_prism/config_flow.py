@@ -1,7 +1,8 @@
 """Silla Prism for Home Assistant."""
-
+import re
 import asyncio
 import logging
+
 from typing import Any
 
 import voluptuous as vol
@@ -65,7 +66,7 @@ class SillaPrismConfigFlow(ConfigFlow, domain=DOMAIN):
             _LOGGER.debug("Called with user input: %s", user_input)
             self._topic = user_input[CONF_TOPIC]
             self._ports = user_input[CONF_PORTS]
-            self._serial = user_input[CONF_SERIAL]
+            self._serial = re.sub(r'[^a-zA-Z0-9]', '', user_input[CONF_SERIAL])
             self._vsensors = user_input[CONF_VSENSORS]
             return await self._async_try_fetch_device_info()
 
