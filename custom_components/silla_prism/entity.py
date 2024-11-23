@@ -28,9 +28,9 @@ def _get_unique_id(serial: str, key: str) -> str:
 def _get_entity_id(serial: str, entity_type: str, key: str) -> str:
     """Get a entity id."""
     if serial == "":
-        return "{}." + DOMAIN + "_{}".format(entity_type, key)
+        return "{}.{}_{}".format(entity_type, DOMAIN, key)
     else:
-        return "{}." + DOMAIN + "_{}_{}".format(entity_type, serial, key)
+        return "{}.{}_{}_{}".format(entity_type, DOMAIN, serial, key)
 
 
 class PrismBaseEntityDescription(EntityDescription, frozen_or_thawed=True):
