@@ -22,6 +22,7 @@ from homeassistant.const import (
     UnitOfEnergy,
     UnitOfPower,
     UnitOfTime,
+    UnitOfTemperature,
 )
 from homeassistant.core import Event, EventStateChangedData, HomeAssistant, callback
 from homeassistant.components import mqtt
@@ -355,6 +356,16 @@ BASE_SENSORS: tuple[PrismSensorEntityDescription, ...] = (
         suggested_display_precision=0,
         has_entity_name=True,
         translation_key="input_grid_power",
+    ),
+    PrismSensorEntityDescription(
+        key="core_temperature",
+        topic="0/info/temperature/core",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        suggested_display_precision=0,
+        has_entity_name=True,
+        translation_key="core_temperature",
     ),
 )
 

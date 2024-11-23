@@ -84,6 +84,9 @@
             "total_output_energy": {
                 "name": "Energia erogata totale"
             },
+            "core_temperature": {
+                "name": "Temperatura della CPU"
+            },
             "input_grid_energy": {
                 "name": "Energia totale dalla rete"
             }

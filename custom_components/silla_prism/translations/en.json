@@ -84,6 +84,9 @@
             "total_output_energy": {
                 "name": "Total energy"
             },
+            "core_temperature": {
+                "name": "CPU temperature"
+            },
             "input_grid_energy": {
                 "name": "Total energy from grid"
             }
