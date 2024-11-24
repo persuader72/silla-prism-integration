@@ -1,15 +1,15 @@
 {
     "domain": "silla_prism",
     "name": "Silla Prism EVSE",
+    "codeowners": ["@persuader72"],
     "config_flow": true,
+    "dependencies": ["mqtt"],
     "documentation": "https://github.com/persuader72/silla-prism-integration/blob/main/README.md",
+    "homekit": {},
+    "iot_class": "local_polling",
     "issue_tracker": "https://github.com/persuader72/silla-prism-integration/blob/main/README.md",
     "requirements": [],
     "ssdp": [],
-    "zeroconf": [],
-    "homekit": {},
-    "dependencies": ["mqtt"],
-    "codeowners": ["@persuader72"],
     "version": "0.5.0",
-    "iot_class": "local_polling"
+    "zeroconf": []
   }
