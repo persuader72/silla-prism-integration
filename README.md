@@ -20,8 +20,15 @@ Prerequisites: A working MQTT server.
 
    ![Prism manual](images/setup3.png)
 
-3. When asked for connection settings set the the base path for all Prism topics. For now it is important to leave a / at the end of the topics as shown in the following picture)
-   ![Configure Silla Prism](images/setup2.png)
+3. **Topic** Set the the base path for all Prism topics must be the same set in the Prism configuration page seen before. For now it is important to leave a **/** at the end of the topic as shown in the picture below)
+
+4. **number of ports ** If you have more the one port (like Prism Duo) on your device set here the corresponding number of ports otherwise if you have only one port you can leave this field at the default value of 1
+
+5. **serial number** or **unique code** if you have more then one Prism connected to HomeAssistant you have to fill this value with a unique code (you can use the serial number) otherwise if you have only one Prism you can leave this field blank.
+
+6. **Enable virtual sensor** this enable additional sensors derived from the original Prism sensors, like the counter of the total energy consumed from the power grid. 
+
+7. ![Configure Silla Prism](images/setup2.png)
 
    
 
