@@ -80,9 +80,7 @@ class PrismBaseEntity(Entity):
     async def _subscribe_topic(self):
         """Subscribe to mqtt topic."""
         _LOGGER.debug("_subscribe_topic: %s", self._topic)
-        self.config_entry.async_on_unload(
-            await mqtt.async_subscribe(self.hass, self._topic, self.message_received)
-        )
+        await mqtt.async_subscribe(self.hass, self._topic, self.message_received)
 
     def _message_received(self, msg) -> None:
         """Change the selected option."""
