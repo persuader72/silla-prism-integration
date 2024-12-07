@@ -5,8 +5,8 @@ from datetime import datetime
 from decimal import Decimal
 import logging
 from typing import List
-from .const import SENSOR_DOMAIN
 
+from homeassistant.components import mqtt
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
@@ -21,20 +21,18 @@ from homeassistant.const import (
     UnitOfElectricPotential,
     UnitOfEnergy,
     UnitOfPower,
-    UnitOfTime,
     UnitOfTemperature,
+    UnitOfTime,
 )
 from homeassistant.core import Event, EventStateChangedData, HomeAssistant, callback
-from homeassistant.components import mqtt
 from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import async_call_later, async_track_state_change_event
 from homeassistant.helpers.restore_state import RestoreEntity
 
-from .const import DOMAIN
-
+from .const import DOMAIN, SENSOR_DOMAIN
 from .domain_data import DomainData
-from .entity import PrismBaseEntity, _get_unique_id, _get_entity_id
+from .entity import PrismBaseEntity, _get_entity_id, _get_unique_id
 from .entry_data import RuntimeEntryData
 
 _LOGGER = logging.getLogger(__name__)
@@ -49,7 +47,7 @@ async def async_setup_entry(
     ports = entry_data.ports
 
     sensors = []
-    for port in range(1, ports+1):
+    for port in range(1, ports + 1):
         for description in SENSORS:
             sensors.append(PrismSensor(entry_data, description, port))
     for description in BASE_SENSORS:
@@ -76,7 +74,9 @@ class PrismGridEnergy(SensorEntity, RestoreEntity):
         self, entry_data: RuntimeEntryData, description: SensorEntityDescription
     ) -> None:
         self._attr_device_info = entry_data.devices[0]
-        self.entity_id = _get_entity_id(entry_data.serial, SENSOR_DOMAIN, description.key)
+        self.entity_id = _get_entity_id(
+            entry_data.serial, SENSOR_DOMAIN, description.key
+        )
         self.entity_description = description
         self._attr_unique_id = _get_unique_id(entry_data.serial, description.key)
         self._integral: Decimal = Decimal(0)
@@ -141,7 +141,9 @@ class PrismSensor(PrismBaseEntity, SensorEntity):
 
     entity_description: PrismSensorEntityDescription
 
-    def description(self, port: int, mulitport: bool, description: PrismSensorEntityDescription) -> PrismSensorEntityDescription:
+    def description(
+        self, port: int, mulitport: bool, description: PrismSensorEntityDescription
+    ) -> PrismSensorEntityDescription:
         if port == 0:
             return description
         if mulitport:

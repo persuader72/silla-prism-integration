@@ -28,7 +28,7 @@ async def async_setup_entry(
 
     ports = entry_data.ports
     selects = []
-    for port in range(1, ports+1):
+    for port in range(1, ports + 1):
         for description in SELECTS:
             selects.append(PrismSelect(entry_data, description, port))
     async_add_entities(selects)
@@ -47,7 +47,9 @@ class PrismSelect(PrismBaseEntity, SelectEntity):
 
     entity_description: PrismSelectEntityDescription
 
-    def description(self, port: int, mulitport: bool, description: PrismSelectEntityDescription) -> PrismSelectEntityDescription:
+    def description(
+        self, port: int, mulitport: bool, description: PrismSelectEntityDescription
+    ) -> PrismSelectEntityDescription:
         if mulitport:
             return PrismSelectEntityDescription(
                 key=description.key.format(port),
@@ -70,12 +72,12 @@ class PrismSelect(PrismBaseEntity, SelectEntity):
                 translation_key=description.translation_key,
                 topic_out=description.topic_out.format(port),
             )
-        
+
     def __init__(
         self,
         entry_data: RuntimeEntryData,
         description: PrismSelectEntityDescription,
-        port: int
+        port: int,
     ) -> None:
         """Init Prism select."""
         ismultiport = entry_data.ports > 1
@@ -83,7 +85,12 @@ class PrismSelect(PrismBaseEntity, SelectEntity):
             device = entry_data.devices[0]
         else:
             device = entry_data.devices[port]
-        super().__init__(entry_data, "select", self.description(port, ismultiport, description), device)
+        super().__init__(
+            entry_data,
+            "select",
+            self.description(port, ismultiport, description),
+            device,
+        )
         if port == 0:
             self._topic_out = entry_data.topic + description.topic_out
         else:

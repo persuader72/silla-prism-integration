@@ -30,7 +30,7 @@ async def async_setup_entry(
     ports = entry_data.ports
     numbers = []
 
-    for port in range(1, ports+1):
+    for port in range(1, ports + 1):
         for description in NUMBERS:
             numbers.append(PrismNumber(entry_data, description, port))
 
@@ -50,7 +50,9 @@ class PrismNumber(PrismBaseEntity, NumberEntity):
 
     entity_description: PrismNumberEntityDescription
 
-    def description(self, port: int, mulitport: bool, description: PrismNumberEntityDescription) -> PrismNumberEntityDescription:
+    def description(
+        self, port: int, mulitport: bool, description: PrismNumberEntityDescription
+    ) -> PrismNumberEntityDescription:
         if mulitport:
             return PrismNumberEntityDescription(
                 key=description.key.format(port),
@@ -80,7 +82,7 @@ class PrismNumber(PrismBaseEntity, NumberEntity):
         self,
         entry_data: RuntimeEntryData,
         description: PrismNumberEntityDescription,
-        port: int
+        port: int,
     ) -> None:
         """Init Prism select."""
         ismultiport = entry_data.ports > 1
@@ -88,7 +90,12 @@ class PrismNumber(PrismBaseEntity, NumberEntity):
             device = entry_data.devices[0]
         else:
             device = entry_data.devices[port]
-        super().__init__(entry_data, "number", self.description(port, ismultiport, description), device)
+        super().__init__(
+            entry_data,
+            "number",
+            self.description(port, ismultiport, description),
+            device,
+        )
         self._topic_out = entry_data.topic + description.topic_out
         self._attr_native_value = self.native_min_value
 

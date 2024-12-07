@@ -52,7 +52,7 @@ class PrismBaseEntity(Entity):
         entry_data: RuntimeEntryData,
         sensor_domain: str,
         description: PrismBaseEntityDescription,
-        device: DeviceInfo
+        device: DeviceInfo,
     ) -> None:
         """Initialize the device info and set the update coordinator."""
         # Create device instance
@@ -60,7 +60,9 @@ class PrismBaseEntity(Entity):
         self.entity_description = description
         # _LOGGER.debug("sensor entity %s", description.key)
         # Preload attributes
-        self.entity_id = _get_entity_id(entry_data.serial, sensor_domain, description.key)
+        self.entity_id = _get_entity_id(
+            entry_data.serial, sensor_domain, description.key
+        )
         # _LOGGER.debug("entity id %s", self.entity_id)
         self._attr_unique_id = _get_unique_id(entry_data.serial, description.key)
         # _LOGGER.debug("entity unique id %s", self._attr_unique_id)

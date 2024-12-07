@@ -31,12 +31,13 @@ async def async_setup_entry(
     entry_data: RuntimeEntryData = DomainData.get(hass).get_entry_data(entry)
     _LOGGER.debug("async_setup_entry for binary sensors: %s", entry_data)
     binsens = [
-        PrismBinarySensor(entry_data, description, 0) for description in BASE_BINARYSENSORS
+        PrismBinarySensor(entry_data, description, 0)
+        for description in BASE_BINARYSENSORS
     ]
 
     events = []
     ports = entry_data.ports
-    for port in range(1, ports+1):
+    for port in range(1, ports + 1):
         for description in EVENTSENSORS:
             events.append(PrismEventBinarySensor(entry_data, description, port))
     async_add_entities(binsens + events)
@@ -106,7 +107,12 @@ class PrismEventBinarySensor(PrismBinarySensor):
 
     entity_description: PrismEventBinarySensorEntityDescription
 
-    def description(self, port: int, mulitport: bool, description: PrismEventBinarySensorEntityDescription) -> PrismEventBinarySensorEntityDescription:
+    def description(
+        self,
+        port: int,
+        mulitport: bool,
+        description: PrismEventBinarySensorEntityDescription,
+    ) -> PrismEventBinarySensorEntityDescription:
         if port == 0:
             return description
         if mulitport:
@@ -140,7 +146,9 @@ class PrismEventBinarySensor(PrismBinarySensor):
     ) -> None:
         """Init Prism event binary sensor."""
         ismultiport = entry_data.ports > 1
-        super().__init__(entry_data, self.description(port, ismultiport, description), port)
+        super().__init__(
+            entry_data, self.description(port, ismultiport, description), port
+        )
         self._sequence: FrozenSet[int] = description.sequence
 
     def _message_received(self, msg) -> None:
