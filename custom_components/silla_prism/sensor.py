@@ -178,21 +178,19 @@ class PrismSensor(PrismBaseEntity, SensorEntity):
             device = entry_data.devices[0]
         else:
             device = entry_data.devices[port]
-        super().__init__(entry_data, SENSOR_DOMAIN, self.description(port, ismultiport, description), device)
-        self._unsubscribe = None
+        super().__init__(
+            entry_data,
+            SENSOR_DOMAIN,
+            self.description(port, ismultiport, description),
+            device,
+        )
 
     async def _subscribe_topic(self):
         """Subscribe to mqtt topic."""
         _LOGGER.debug("_subscribe_topic: %s", self._topic)
-        self._unsubscribe = await mqtt.async_subscribe(
-            self.hass, self._topic, self.message_received
+        self.config_entry.async_on_unload(
+            await mqtt.async_subscribe(self.hass, self._topic, self.message_received)
         )
-
-    async def _unsubscribe_topic(self):
-        """Unsubscribe to mqtt topic."""
-        _LOGGER.debug("_unsubscribe_topic: %s", self._topic)
-        if self._unsubscribe is not None:
-            await self._unsubscribe()
 
     @callback
     def _value_is_expired(self, *_: datetime) -> None:
@@ -234,7 +232,7 @@ class PrismSensor(PrismBaseEntity, SensorEntity):
         await self._subscribe_topic()
 
     async def async_will_remove_from_hass(self) -> None:
-        """Unsubscribe from mqtt."""
+        """Remove entity from hass."""
         _LOGGER.debug("called async_will_remove_from_hass fir %s", self.entity_id)
         await super().async_will_remove_from_hass()
         # Clean up expire triggers
@@ -242,8 +240,6 @@ class PrismSensor(PrismBaseEntity, SensorEntity):
             self._expiration_trigger()
             self._expiration_trigger = None
             self._attr_available = True
-        if self._unsubscribe is not None:
-            await self._unsubscribe_topic()
 
 
 SENSORS: tuple[PrismSensorEntityDescription, ...] = (

@@ -107,8 +107,6 @@ class PrismNumber(PrismBaseEntity, NumberEntity):
         _LOGGER.debug("async_will_remove_from_hass key:%s", self.entity_description.key)
         await super().async_will_remove_from_hass()
         self.cleanup_expiration_trigger()
-        if self._unsubscribe is not None:
-            await self._unsubscribe_topic()
 
     def set_native_value(self, _: float) -> None:
         return NotImplementedError

@@ -70,7 +70,6 @@ class PrismBaseEntity(Entity):
         # Init expire proceudre
         if self._expire_after is not None and self._expire_after > 0:
             self._attr_available = False
-        self._unsubscribe = None
 
     @callback
     def _value_is_expired(self, *_: datetime) -> None:
@@ -83,10 +82,8 @@ class PrismBaseEntity(Entity):
     async def _subscribe_topic(self):
         """Subscribe to mqtt topic."""
         _LOGGER.debug("_subscribe_topic: %s", self._topic)
-        self._unsubscribe = await mqtt.async_subscribe(
-            self.hass,
-            self._topic, 
-            self.message_received
+        self.config_entry.async_on_unload(
+            await mqtt.async_subscribe(self.hass, self._topic, self.message_received)
         )
 
     def _message_received(self, msg) -> None:
@@ -96,12 +93,6 @@ class PrismBaseEntity(Entity):
     def message_received(self, msg) -> None:
         """Update the sensor with the most recent event."""
         self.hass.loop.call_soon_threadsafe(self._message_received, msg)
-
-    async def _unsubscribe_topic(self):
-        """Unsubscribe to mqtt topic."""
-        _LOGGER.debug("_unsubscribe_topic: %s", self._topic)
-        if self._unsubscribe is not None:
-            await self._unsubscribe()
 
     def schedule_expiration_callback(self) -> None:
         """When self._expire_after is set, and we receive a message, assume device is not expired since it has to be to receive the message."""

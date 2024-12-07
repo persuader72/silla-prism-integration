@@ -99,8 +99,6 @@ class PrismBinarySensor(PrismBaseEntity, BinarySensorEntity):
         _LOGGER.debug("async_will_remove_from_hass")
         await super().async_will_remove_from_hass()
         self.cleanup_expiration_trigger()
-        if self._unsubscribe is not None:
-            await self._unsubscribe_topic()
 
 
 class PrismEventBinarySensor(PrismBinarySensor):

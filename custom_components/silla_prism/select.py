@@ -110,8 +110,6 @@ class PrismSelect(PrismBaseEntity, SelectEntity):
         _LOGGER.debug("async_will_remove_from_hass key:%s", self.entity_description.key)
         await super().async_will_remove_from_hass()
         self.cleanup_expiration_trigger()
-        if self._unsubscribe is not None:
-            await self._unsubscribe_topic()
 
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""
