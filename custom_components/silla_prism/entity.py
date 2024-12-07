@@ -3,15 +3,14 @@
 from datetime import datetime
 import logging
 
+from homeassistant.components import mqtt
 from homeassistant.core import CALLBACK_TYPE, callback
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity import Entity, EntityDescription
 from homeassistant.helpers.event import async_call_later
-from homeassistant.components import mqtt
-
-from .entry_data import RuntimeEntryData
 
 from .const import DOMAIN
+from .entry_data import RuntimeEntryData
 
 _LOGGER = logging.getLogger(__name__)
 # ENTITY_ID_SENSOR_FORMAT = "{}." + DOMAIN + "_{}"
@@ -19,18 +18,16 @@ _LOGGER = logging.getLogger(__name__)
 
 def _get_unique_id(serial: str, key: str) -> str:
     """Get a unique entity id."""
-    if serial == "":
-        return "prism_" + key + "_001"
-    else:
-        return "prism_{}_{}".format(serial, key)
+    return "prism_" + key + "_001" if serial == "" else f"prism_{serial}_{key}"
 
 
 def _get_entity_id(serial: str, entity_type: str, key: str) -> str:
     """Get a entity id."""
-    if serial == "":
-        return "{}.{}_{}".format(entity_type, DOMAIN, key)
-    else:
-        return "{}.{}_{}_{}".format(entity_type, DOMAIN, serial, key)
+    return (
+        f"{entity_type}.{DOMAIN}_{key}"
+        if serial == ""
+        else f"{entity_type}.{DOMAIN}_{serial}_{key}"
+    )
 
 
 class PrismBaseEntityDescription(EntityDescription, frozen_or_thawed=True):
@@ -67,7 +64,6 @@ class PrismBaseEntity(Entity):
         self._attr_unique_id = _get_unique_id(entry_data.serial, description.key)
         # _LOGGER.debug("entity unique id %s", self._attr_unique_id)
         self._topic = entry_data.topic + description.topic
-        # TODO: Put this in config
         self._expire_after = description.expire_after
         # Init expire proceudre
         if self._expire_after is not None and self._expire_after > 0:

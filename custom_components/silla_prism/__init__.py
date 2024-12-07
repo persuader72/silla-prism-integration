@@ -22,19 +22,17 @@ PLATFORMS = [Platform.BINARY_SENSOR, Platform.NUMBER, Platform.SELECT, Platform.
 def _get_device_identifier(port: int, serial: str) -> str:
     if serial == "" and port == 0:
         return "SillaPrism001"
-    elif serial == "":
-        return "PrismPort{}".format(port)
-    else:
-        return "Prism_Port{}_Serial{}".format(port, serial)
+    if serial == "":
+        return f"PrismPort{port}"
+    return f"Prism_Port{port}_Serial{serial}"
 
 
 def _get_device_name(port: int, serial: str) -> str:
     if serial == "" and port == 0:
         return "Prism"
-    elif serial == "":
-        return "Prism Port {}".format(port)
-    else:
-        return "Prism Serial {} Port {}".format(serial, port)
+    if serial == "":
+        return f"Prism Port {port}"
+    return f"Prism Serial {serial} Port {port}"
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -59,8 +57,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
     )
 
-    for port in range(1, _ports + 1):
-        _devices_info.append(
+    _devices_info.extend(
+        [
             DeviceInfo(
                 identifiers={(DOMAIN, _get_device_identifier(port, _serial))},
                 name=_get_device_name(port, _serial),
@@ -68,7 +66,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 model="Prism",
                 serial_number=_serial,
             )
-        )
+            for port in range(1, _ports + 1)
+        ]
+    )
 
     entry_data = RuntimeEntryData(
         topic=_topic,
