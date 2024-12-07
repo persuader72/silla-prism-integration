@@ -360,6 +360,7 @@ BASE_SENSORS: tuple[PrismSensorEntityDescription, ...] = (
     PrismSensorEntityDescription(
         key="core_temperature",
         topic="0/info/temperature/core",
+        expire_after=86400,
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
