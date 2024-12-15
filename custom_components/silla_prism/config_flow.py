@@ -1,8 +1,8 @@
 """Silla Prism for Home Assistant."""
-import re
+
 import asyncio
 import logging
-
+import re
 from typing import Any
 
 import voluptuous as vol
@@ -11,7 +11,17 @@ from homeassistant.components import mqtt
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 from homeassistant.helpers import config_validation as cv
 
-from .const import CONF_TOPIC, CONF_PORTS, CONF_SERIAL, CONF_VSENSORS, DEFAULT_TOPIC, DEFAULT_PORTS, DEFAULT_SERIAL, DEFAULT_VSENSORS, DOMAIN
+from .const import (
+    CONF_PORTS,
+    CONF_SERIAL,
+    CONF_TOPIC,
+    CONF_VSENSORS,
+    DEFAULT_PORTS,
+    DEFAULT_SERIAL,
+    DEFAULT_TOPIC,
+    DEFAULT_VSENSORS,
+    DOMAIN,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,6 +46,7 @@ class SillaPrismConfigFlow(ConfigFlow, domain=DOMAIN):
         self._topic: str | None = DEFAULT_TOPIC
         self._ports: int = DEFAULT_PORTS
         self._vsensors: bool = DEFAULT_VSENSORS
+        self._serial: str = DEFAULT_SERIAL
 
     async def fetch_device_info(self) -> str | None:
         """Fetech information from MQTT."""
@@ -66,7 +77,7 @@ class SillaPrismConfigFlow(ConfigFlow, domain=DOMAIN):
             _LOGGER.debug("Called with user input: %s", user_input)
             self._topic = user_input[CONF_TOPIC]
             self._ports = user_input[CONF_PORTS]
-            self._serial = re.sub(r'[^a-zA-Z0-9]', '', user_input[CONF_SERIAL])
+            self._serial = re.sub(r"[^a-zA-Z0-9]", "", user_input[CONF_SERIAL])
             self._vsensors = user_input[CONF_VSENSORS]
             return await self._async_try_fetch_device_info()
 
@@ -98,7 +109,12 @@ class SillaPrismConfigFlow(ConfigFlow, domain=DOMAIN):
         return await self._async_step_user_base(error=error)
 
     async def _async_get_entry(self) -> ConfigFlowResult:
-        config_data = {CONF_TOPIC: self._topic, CONF_PORTS: self._ports, CONF_SERIAL: self._serial, CONF_VSENSORS: self._vsensors}
+        config_data = {
+            CONF_TOPIC: self._topic,
+            CONF_PORTS: self._ports,
+            CONF_SERIAL: self._serial,
+            CONF_VSENSORS: self._vsensors,
+        }
         return self.async_create_entry(
             title="SillaPrism",
             data=config_data,
