@@ -4,9 +4,7 @@ from contextlib import suppress
 from datetime import datetime
 from decimal import Decimal
 import logging
-from typing import List
 
-from homeassistant.components import mqtt
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
@@ -30,7 +28,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import async_call_later, async_track_state_change_event
 from homeassistant.helpers.restore_state import RestoreEntity
 
-from .const import DOMAIN, SENSOR_DOMAIN
+from .const import SENSOR_DOMAIN
 from .domain_data import DomainData
 from .entity import PrismBaseEntity, _get_entity_id, _get_unique_id
 from .entry_data import RuntimeEntryData
@@ -48,10 +46,12 @@ async def async_setup_entry(
 
     sensors = []
     for port in range(1, ports + 1):
-        for description in SENSORS:
-            sensors.append(PrismSensor(entry_data, description, port))
-    for description in BASE_SENSORS:
-        sensors.append(PrismSensor(entry_data, description, 0))
+        sensors.extend(
+            [PrismSensor(entry_data, description, port) for description in SENSORS]
+        )
+    sensors.extend(
+        [PrismSensor(entry_data, description, 0) for description in BASE_SENSORS]
+    )
     if entry_data.vsensors:
         sensors.append(PrismGridEnergy(entry_data, VSENSORS[0]))
     async_add_entities(sensors)
@@ -73,6 +73,7 @@ class PrismGridEnergy(SensorEntity, RestoreEntity):
     def __init__(
         self, entry_data: RuntimeEntryData, description: SensorEntityDescription
     ) -> None:
+        """Init Prism energy sensor."""
         self._attr_device_info = entry_data.devices[0]
         self.entity_id = _get_entity_id(
             entry_data.serial, SENSOR_DOMAIN, description.key
@@ -82,7 +83,7 @@ class PrismGridEnergy(SensorEntity, RestoreEntity):
         self._integral: Decimal = Decimal(0)
 
     async def async_added_to_hass(self) -> None:
-        """Called when sensor is added to hass"""
+        """Sensor is added to hass."""
         _LOGGER.debug("async_added_to_hass %s", self.entity_description.key)
         await super().async_internal_added_to_hass()
 
@@ -94,7 +95,7 @@ class PrismGridEnergy(SensorEntity, RestoreEntity):
                     self._attr_native_value = round(self._integral, 1)
             else:
                 _LOGGER.warning(
-                    "async_added_to_hass can't restore state of %s",
+                    "Can't restore state of %s",
                     self.entity_description.key,
                 )
 
@@ -141,7 +142,7 @@ class PrismSensor(PrismBaseEntity, SensorEntity):
 
     entity_description: PrismSensorEntityDescription
 
-    def description(
+    def _get_description(
         self, port: int, mulitport: bool, description: PrismSensorEntityDescription
     ) -> PrismSensorEntityDescription:
         if port == 0:
@@ -158,18 +159,17 @@ class PrismSensor(PrismBaseEntity, SensorEntity):
                 has_entity_name=description.has_entity_name,
                 translation_key=description.translation_key,
             )
-        else:
-            return PrismSensorEntityDescription(
-                key=description.key[:-3],
-                topic=description.topic.format(port),
-                device_class=description.device_class,
-                state_class=description.state_class,
-                native_unit_of_measurement=description.native_unit_of_measurement,
-                suggested_display_precision=description.suggested_display_precision,
-                options=description.options,
-                has_entity_name=description.has_entity_name,
-                translation_key=description.translation_key,
-            )
+        return PrismSensorEntityDescription(
+            key=description.key[:-3],
+            topic=description.topic.format(port),
+            device_class=description.device_class,
+            state_class=description.state_class,
+            native_unit_of_measurement=description.native_unit_of_measurement,
+            suggested_display_precision=description.suggested_display_precision,
+            options=description.options,
+            has_entity_name=description.has_entity_name,
+            translation_key=description.translation_key,
+        )
 
     def __init__(
         self, entry_data: RuntimeEntryData, description: EntityDescription, port: int
@@ -183,14 +183,9 @@ class PrismSensor(PrismBaseEntity, SensorEntity):
         super().__init__(
             entry_data,
             SENSOR_DOMAIN,
-            self.description(port, ismultiport, description),
+            self._get_description(port, ismultiport, description),
             device,
         )
-
-    async def _subscribe_topic(self):
-        """Subscribe to mqtt topic."""
-        _LOGGER.debug("_subscribe_topic: %s", self._topic)
-        await mqtt.async_subscribe(self.hass, self._topic, self.message_received)
 
     @callback
     def _value_is_expired(self, *_: datetime) -> None:
@@ -366,7 +361,7 @@ BASE_SENSORS: tuple[PrismSensorEntityDescription, ...] = (
     ),
 )
 
-VSENSORS: List[SensorEntityDescription] = [
+VSENSORS: list[SensorEntityDescription] = [
     SensorEntityDescription(
         key="input_grid_energy",
         device_class=SensorDeviceClass.ENERGY,

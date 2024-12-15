@@ -1,6 +1,7 @@
 """Runtime entry data for Silla Prism stored in hass.data."""
-from typing import List
+
 from dataclasses import dataclass
+
 from homeassistant.helpers.device_registry import DeviceInfo
 
 
@@ -12,5 +13,4 @@ class RuntimeEntryData:
     ports: int
     vsensors: bool
     serial: str
-    devices: List[DeviceInfo]
-
+    devices: list[DeviceInfo]

@@ -2,7 +2,7 @@
 
 from datetime import datetime
 import logging
-from typing import FrozenSet, override
+from typing import override
 
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
@@ -15,6 +15,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import async_call_later
 
+from .const import BINARY_SENSOR_DOMAIN
 from .domain_data import DomainData
 from .entity import PrismBaseEntity
 from .entry_data import RuntimeEntryData
@@ -38,8 +39,12 @@ async def async_setup_entry(
     events = []
     ports = entry_data.ports
     for port in range(1, ports + 1):
-        for description in EVENTSENSORS:
-            events.append(PrismEventBinarySensor(entry_data, description, port))
+        events.extend(
+            [
+                PrismEventBinarySensor(entry_data, description, port)
+                for description in EVENTSENSORS
+            ]
+        )
     async_add_entities(binsens + events)
 
 
@@ -57,7 +62,7 @@ class PrismEventBinarySensorEntityDescription(
 ):
     """A class that describes prism button event sensor entities."""
 
-    sequence: FrozenSet[int] = (1,)
+    sequence: frozenset[int] = (1,)
 
 
 class PrismBinarySensor(PrismBaseEntity, BinarySensorEntity):
@@ -78,7 +83,7 @@ class PrismBinarySensor(PrismBaseEntity, BinarySensorEntity):
             device = entry_data.devices[0]
         else:
             device = entry_data.devices[port]
-        super().__init__(entry_data, "binary_sensor", description, device)
+        super().__init__(entry_data, BINARY_SENSOR_DOMAIN, description, device)
         self._attr_is_on = False
 
     @override
@@ -103,11 +108,11 @@ class PrismBinarySensor(PrismBaseEntity, BinarySensorEntity):
 
 
 class PrismEventBinarySensor(PrismBinarySensor):
-    """Prism button event sensor entity"""
+    """Prism button event sensor entity."""
 
     entity_description: PrismEventBinarySensorEntityDescription
 
-    def description(
+    def _get_description(
         self,
         port: int,
         mulitport: bool,
@@ -126,17 +131,16 @@ class PrismEventBinarySensor(PrismBinarySensor):
                 translation_key=description.translation_key,
                 expire_after=description.expire_after,
             )
-        else:
-            return PrismEventBinarySensorEntityDescription(
-                key=description.key[:-3],
-                topic=description.topic.format(port),
-                entity_category=description.entity_category,
-                device_class=description.device_class,
-                has_entity_name=description.has_entity_name,
-                sequence=description.sequence,
-                translation_key=description.translation_key,
-                expire_after=description.expire_after,
-            )
+        return PrismEventBinarySensorEntityDescription(
+            key=description.key[:-3],
+            topic=description.topic.format(port),
+            entity_category=description.entity_category,
+            device_class=description.device_class,
+            has_entity_name=description.has_entity_name,
+            sequence=description.sequence,
+            translation_key=description.translation_key,
+            expire_after=description.expire_after,
+        )
 
     def __init__(
         self,
@@ -147,9 +151,9 @@ class PrismEventBinarySensor(PrismBinarySensor):
         """Init Prism event binary sensor."""
         ismultiport = entry_data.ports > 1
         super().__init__(
-            entry_data, self.description(port, ismultiport, description), port
+            entry_data, self._get_description(port, ismultiport, description), port
         )
-        self._sequence: FrozenSet[int] = description.sequence
+        self._sequence: frozenset[int] = description.sequence
 
     def _message_received(self, msg) -> None:
         """Update the sensor with the most recent event."""

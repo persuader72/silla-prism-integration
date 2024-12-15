@@ -2,6 +2,7 @@
 
 DOMAIN = "silla_prism"
 SENSOR_DOMAIN = "sensor"
+BINARY_SENSOR_DOMAIN = "binary_sensor"
 
 CONF_TOPIC = "topic"
 CONF_VSENSORS = "vsensors"
