@@ -187,7 +187,7 @@ class PrismEventBinarySensor(PrismBinarySensor):
 BASE_BINARYSENSORS = [
     PrismBinarySensorEntityDescription(
         key="online",
-        topic="prism/1/volt",
+        topic="1/volt",
         device_class=BinarySensorDeviceClass.CONNECTIVITY,
         has_entity_name=True,
         translation_key="online",
