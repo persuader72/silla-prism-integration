@@ -187,28 +187,9 @@ class PrismSensor(PrismBaseEntity, SensorEntity):
             device,
         )
 
-    @callback
-    def _value_is_expired(self, *_: datetime) -> None:
-        """Triggered when value is expired."""
-        _LOGGER.debug("_value_is_expired %s", self._topic)
-        self._expiration_trigger = None
-        self._attr_available = False
-        self.async_write_ha_state()
-
     def _message_received(self, msg) -> None:
         """Update the sensor with the most recent event."""
-        # _LOGGER.debug("_message_received %s %s", self._topic, msg.payload)
-        if self._expire_after is not None and self._expire_after > 0:
-            # When self._expire_after is set, and we receive a message, assume
-            # device is not expired since it has to be to receive the message
-            self._attr_available = True
-            # Reset old trigger
-            if self._expiration_trigger:
-                self._expiration_trigger()
-            # Set new trigger
-            self._expiration_trigger = async_call_later(
-                self.hass, self._expire_after, self._value_is_expired
-            )
+        self.schedule_expiration_callback()
         # Update native value
         if self.options is not None:
             try:

@@ -96,6 +96,11 @@ class PrismBinarySensor(PrismBaseEntity, BinarySensorEntity):
             self._attr_is_on = True
             self.schedule_update_ha_state()
 
+    @override
+    def _value_is_expired(self):
+        """Triggered when value is expired."""
+        self._attr_is_on = False
+
     async def async_added_to_hass(self) -> None:
         """Subscribe to mqtt."""
         await self._subscribe_topic()
@@ -191,7 +196,7 @@ BASE_BINARYSENSORS = [
         device_class=BinarySensorDeviceClass.CONNECTIVITY,
         has_entity_name=True,
         translation_key="online",
-        expire_after=0,
+        expire_after=150,
     ),
 ]
 

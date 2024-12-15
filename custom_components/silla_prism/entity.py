@@ -67,17 +67,21 @@ class PrismBaseEntity(Entity):
             self._attr_available = False
 
     @callback
-    def _value_is_expired(self, *_: datetime) -> None:
+    def value_is_expired(self, *_: datetime) -> None:
         """Triggered when value is expired."""
-        _LOGGER.debug("entity _value_is_expired for topic %s", self._topic)
+        _LOGGER.debug("entity value_is_expired for topic %s", self._topic)
         self._expiration_trigger = None
-        self._attr_available = False
+        self._value_is_expired()
         self.async_write_ha_state()
 
     async def _subscribe_topic(self):
         """Subscribe to mqtt topic."""
         _LOGGER.debug("_subscribe_topic: %s", self._topic)
         await mqtt.async_subscribe(self.hass, self._topic, self.message_received)
+
+    def _value_is_expired(self):
+        """Triggered when value is expired. To be overridden."""
+        self._attr_available = False
 
     def _message_received(self, msg) -> None:
         """Change the selected option."""
@@ -91,13 +95,14 @@ class PrismBaseEntity(Entity):
         """When self._expire_after is set, and we receive a message, assume device is not expired since it has to be to receive the message."""
         if self._expire_after is not None and self._expire_after > 0:
             self._attr_available = True
-            # Reset old trigger
             if self._expiration_trigger:
+                # Reset old trigger
                 self._expiration_trigger()
-            # Set new trigger
-            self._expiration_trigger = async_call_later(
-                self.hass, self._expire_after, self._value_is_expired
-            )
+            else:
+                # Set new trigger
+                self._expiration_trigger = async_call_later(
+                    self.hass, self._expire_after, self.value_is_expired
+                )
 
     def cleanup_expiration_trigger(self) -> None:
         """Clean up expiration triggers."""
