@@ -349,7 +349,7 @@ VSENSORS: list[SensorEntityDescription] = [
         key="input_grid_energy",
         device_class=SensorDeviceClass.ENERGY,
         state_class=SensorStateClass.TOTAL_INCREASING,
-        native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         has_entity_name=True,
         translation_key="input_grid_energy",
     )
