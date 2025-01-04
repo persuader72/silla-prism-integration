@@ -124,10 +124,12 @@ class PrismGridEnergy(SensorEntity, RestoreEntity):
             return
 
         elapsed_time = Decimal(
-            (new_state.last_updated - old_state.last_updated).total_seconds() / 3600
+            ((new_state.last_updated - old_state.last_updated).total_seconds()) / 3600
         )
+
+        # Wh to kWh conversion is Wh/1000
         average_value = (Decimal(new_state.state) + Decimal(old_state.state)) / Decimal(
-            2
+            2000
         )
         self._integral += elapsed_time * average_value
         self._attr_native_value = round(self._integral, 1)
