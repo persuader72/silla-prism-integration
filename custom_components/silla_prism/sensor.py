@@ -1,7 +1,6 @@
 """Contains sensors exposed by the Prism wallbox integration."""
 
 from contextlib import suppress
-from datetime import datetime
 from decimal import Decimal
 import logging
 
@@ -25,7 +24,7 @@ from homeassistant.const import (
 from homeassistant.core import Event, EventStateChangedData, HomeAssistant, callback
 from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.event import async_call_later, async_track_state_change_event
+from homeassistant.helpers.event import async_track_state_change_event
 from homeassistant.helpers.restore_state import RestoreEntity
 
 from .const import SENSOR_DOMAIN
@@ -131,7 +130,16 @@ class PrismGridEnergy(SensorEntity, RestoreEntity):
         average_value = (Decimal(new_state.state) + Decimal(old_state.state)) / Decimal(
             2000
         )
+
         self._integral += elapsed_time * average_value
+
+        # _LOGGER.debug(
+        #     "Elapsed_time: %s, average_value: %s, integral: %s",
+        #     elapsed_time,
+        #     average_value,
+        #     self._integral,
+        # )
+
         self._attr_native_value = round(self._integral, 1)
 
         if not self._attr_available:
