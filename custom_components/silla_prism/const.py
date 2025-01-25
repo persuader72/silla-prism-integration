@@ -3,7 +3,8 @@
 DOMAIN = "silla_prism"
 SENSOR_DOMAIN = "sensor"
 BINARY_SENSOR_DOMAIN = "binary_sensor"
-
+NUMBER_DOMAIN = "number"
+SELECT_DOMAIN = "select"
 CONF_TOPIC = "topic"
 CONF_VSENSORS = "vsensors"
 CONF_PORTS = "ports"

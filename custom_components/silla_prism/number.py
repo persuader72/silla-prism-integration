@@ -4,13 +4,18 @@ import logging
 from typing import override
 
 from homeassistant.components import mqtt
-from homeassistant.components.number import NumberEntity, NumberEntityDescription
-from homeassistant.components.number.const import NumberDeviceClass, NumberMode
+from homeassistant.components.number import (
+    NumberDeviceClass,
+    NumberEntity,
+    NumberEntityDescription,
+    NumberMode,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
+from .const import NUMBER_DOMAIN
 from .domain_data import DomainData
 from .entity import PrismBaseEntity
 from .entry_data import RuntimeEntryData
@@ -28,11 +33,12 @@ async def async_setup_entry(
     _LOGGER.debug("async_setup_entry for numbers: %s", entry_data)
 
     ports = entry_data.ports
-    numbers = []
 
+    numbers = []
     for port in range(1, ports + 1):
-        for description in NUMBERS:
-            numbers.append(PrismNumber(entry_data, description, port))
+        numbers.extend(
+            [PrismNumber(entry_data, description, port) for description in NUMBERS]
+        )
 
     async_add_entities(numbers)
 
@@ -53,10 +59,12 @@ class PrismNumber(PrismBaseEntity, NumberEntity):
     def description(
         self, port: int, mulitport: bool, description: PrismNumberEntityDescription
     ) -> PrismNumberEntityDescription:
+        """Create a Number entity for Prism EVSE devices."""
         if mulitport:
             return PrismNumberEntityDescription(
                 key=description.key.format(port),
                 topic=description.topic.format(port),
+                topic_out=description.topic_out.format(port),
                 entity_category=description.entity_category,
                 device_class=description.device_class,
                 native_min_value=description.native_min_value,
@@ -65,18 +73,18 @@ class PrismNumber(PrismBaseEntity, NumberEntity):
                 has_entity_name=description.has_entity_name,
                 translation_key=description.translation_key,
             )
-        else:
-            return PrismNumberEntityDescription(
-                key=description.key[:-3],
-                topic=description.topic.format(port),
-                entity_category=description.entity_category,
-                device_class=description.device_class,
-                native_min_value=description.native_min_value,
-                native_max_value=description.native_max_value,
-                mode=description.mode,
-                has_entity_name=description.has_entity_name,
-                translation_key=description.translation_key,
-            )
+        return PrismNumberEntityDescription(
+            key=description.key[:-3],
+            topic=description.topic.format(port),
+            topic_out=description.topic_out.format(port),
+            entity_category=description.entity_category,
+            device_class=description.device_class,
+            native_min_value=description.native_min_value,
+            native_max_value=description.native_max_value,
+            mode=description.mode,
+            has_entity_name=description.has_entity_name,
+            translation_key=description.translation_key,
+        )
 
     def __init__(
         self,
@@ -90,13 +98,16 @@ class PrismNumber(PrismBaseEntity, NumberEntity):
             device = entry_data.devices[0]
         else:
             device = entry_data.devices[port]
+
+        _description = self.description(port, ismultiport, description)
         super().__init__(
             entry_data,
-            "number",
-            self.description(port, ismultiport, description),
+            NUMBER_DOMAIN,
+            _description,
             device,
         )
-        self._topic_out = entry_data.topic + description.topic_out
+
+        self._topic_out = entry_data.topic + _description.topic_out
         self._attr_native_value = self.native_min_value
 
     @override
@@ -116,16 +127,17 @@ class PrismNumber(PrismBaseEntity, NumberEntity):
         self.cleanup_expiration_trigger()
 
     def set_native_value(self, _: float) -> None:
+        """Set the native value."""
         return NotImplementedError
 
     async def async_set_native_value(self, value: float) -> None:
         """Update the current value."""
-        _LOGGER.debug(
-            "async_set_native_value key:%s topic:%s value:%f",
-            self.entity_description.key,
-            self._topic_out,
-            value,
-        )
+        # _LOGGER.debug(
+        #     "async_set_native_value key:%s topic:%s value:%f",
+        #     self.entity_description.key,
+        #     self._topic_out,
+        #     value,
+        # )
         await mqtt.async_publish(self.hass, self._topic_out, int(value))
 
 
