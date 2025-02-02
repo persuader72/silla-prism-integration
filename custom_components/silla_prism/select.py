@@ -96,22 +96,36 @@ class PrismSelect(PrismBaseEntity, SelectEntity):
             device,
         )
 
+        self._attr_current_option = None
         self._topic_out = entry_data.topic + _description.topic_out
-        self._attr_current_option = "normal"
 
-    @override
     def _message_received(self, msg) -> None:
         """Update the sensor with the most recent event."""
         try:
             _sel = int(msg.payload) - 1
-            if _sel >= 0 and _sel < len(self.options):
-                self._attr_current_option = self.options[_sel]
-                self.schedule_update_ha_state()
         except ValueError:
-            pass
+            _LOGGER.warning(
+                "Invalid topic payload: topic:%s payload:%s",
+                self._topic,
+                msg.payload,
+            )
+            return
+
+        # FIXME: this is a hack to fix the autolimit mode. To be implemented in a better way
+        # If mode is autolimit, set to pause
+        if _sel == 6:
+            _sel = 2
+        # Update state if value is valid and different from current option
+        if (
+            0 <= _sel < len(self.options)
+            and self.options[_sel] != self._attr_current_option
+        ):
+            self._attr_current_option = self.options[_sel]
+            self.schedule_update_ha_state()
 
     async def async_added_to_hass(self) -> None:
         """Subscribe to mqtt."""
+        _LOGGER.debug("async_added_to_hass key:%s", self.entity_description.key)
         await self._subscribe_topic()
 
     async def async_will_remove_from_hass(self) -> None:
@@ -122,13 +136,7 @@ class PrismSelect(PrismBaseEntity, SelectEntity):
 
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""
-        # _LOGGER.debug(
-        #     "async_select_option: key:%s topic:%s %s(%d)",
-        #     self.entity_description.key,
-        #     self._topic_out,
-        #     option,
-        #     self.options.index(option) + 1,
-        # )
+        self._attr_current_option = option
         await mqtt.async_publish(
             self.hass, self._topic_out, self.options.index(option) + 1
         )
@@ -137,7 +145,7 @@ class PrismSelect(PrismBaseEntity, SelectEntity):
 SELECTS: tuple[PrismSelectEntityDescription, ...] = (
     PrismSelectEntityDescription(
         key="set_mode_{}",
-        topic="{}/command/set_mode",
+        topic="{}/mode",
         topic_out="{}/command/set_mode",
         entity_category=EntityCategory.CONFIG,
         options=["solar", "normal", "paused"],

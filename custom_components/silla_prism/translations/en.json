@@ -54,7 +54,12 @@
         },
         "select": {
             "set_port_mode": {
-                "name": "Set port output mode"
+                "name": "Set port output mode",
+                "state": {
+                    "solar": "Solar",
+                    "normal": "Normal",
+                    "paused": "Paused"
+                }
             }
         },
         "sensor": {

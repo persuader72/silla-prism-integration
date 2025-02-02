@@ -54,7 +54,12 @@
         },
         "select": {
             "set_port_mode": {
-                "name": "Imposta modlit\u00e0 porta"
+                "name": "Imposta modlit\u00e0 porta",
+                "state": {
+                    "solar": "Solare",
+                    "normal": "Normale",
+                    "paused": "In pausa"
+                }
             }
         },
         "sensor": {
