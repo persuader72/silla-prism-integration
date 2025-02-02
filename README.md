@@ -30,7 +30,9 @@ Prerequisites: A working MQTT server.
 
 7. ![Configure Silla Prism](images/setup2.png)
 
-   
+## Solar automations
+
+Solar automation is a work in progress. And we be described in [Solar](solar.md) page 
 
 ## Entities
 
