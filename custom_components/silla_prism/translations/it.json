@@ -37,7 +37,11 @@
                 "name": "Pressione lunga"
             },
             "online": {
-                "name": "Connesione attiva"
+                "name": "Stato connessione",
+                "state": {
+                    "on": "Connesso",
+                    "off": "Disconnesso"
+                }
             }
         },
         "number": {
@@ -58,7 +62,15 @@
                 "name": "Corrente erogata"
             },
             "current_port_mode": {
-                "name": "Modo della porta"
+                "name": "Modo della porta",
+                "state": {
+                    "solar": "Solare",
+                    "normal": "Normale",
+                    "paused": "In pausa",
+                    "suspended": "In sospeso",
+                    "unknown": "Sconosciuto",
+                    "autolimit": "Auto limitazione"
+                }
             },
             "output_car_current": {
                 "name": "Corrente pilotata dall'auto"
@@ -67,7 +79,13 @@
                 "name": "Potenza prelevata dalla rete"
             },
             "current_state": {
-                "name": "Stato wallbox"
+                "name": "Stato wallbox",
+                "state": {
+                    "idle": "Inattivo",
+                    "waiting": "In attesa",
+                    "charging": "In carica",
+                    "pause": "In pausa"
+                }
             },
             "current_set_by_user": {
                 "name": "Corrente limitata dall'utente"

@@ -37,7 +37,11 @@
                 "name": "Long touch"
             },
             "online": {
-                "name": "Is online"
+                "name": "Connection status",
+                "state": {
+                    "on": "Online",
+                    "off": "Offline"
+                }
             }
         },
         "number": {
@@ -58,7 +62,15 @@
                 "name": "Output current"
             },
             "current_port_mode": {
-                "name": "Current port output mode"
+                "name": "Current port output mode",
+                "state": {
+                    "solar": "Solar",
+                    "normal": "Normal",
+                    "paused": "Paused",
+                    "suspended": "Suspended",
+                    "unknown": "Unknown",
+                    "autolimit": "Auto limit"
+                }
             },
             "output_car_current": {
                 "name": "Car requested by car"
@@ -67,7 +79,13 @@
                 "name": "Power from utility"
             },
             "current_state": {
-                "name": "Wallbox current state"
+                "name": "Wallbox current state",
+                "state": {
+                    "idle": "Idle",
+                    "waiting": "Waiting",
+                    "charging": "Charging",
+                    "pause": "Paused"
+                }
             },
             "current_set_by_user": {
                 "name": "Current limited by user"

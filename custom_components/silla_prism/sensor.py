@@ -317,12 +317,19 @@ SENSORS: tuple[PrismSensorEntityDescription, ...] = (
         has_entity_name=True,
         translation_key="total_output_energy",
     ),
-    # FIXME: suspended is not 4 but 7
     PrismSensorEntityDescription(
         key="current_port_mode_{}",
         topic="{}/mode",
         device_class=SensorDeviceClass.ENUM,
-        options=["solar", "normal", "paused", "suspended"],
+        options=[
+            "solar",
+            "normal",
+            "paused",
+            "suspended",
+            "unknown",
+            "unknown",
+            "autolimit",
+        ],
         has_entity_name=True,
         translation_key="current_port_mode",
     ),
