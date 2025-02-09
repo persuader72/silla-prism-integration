@@ -59,14 +59,26 @@ class SillaPrismConfigFlow(ConfigFlow, domain=DOMAIN):
             _LOGGER.debug("New intent: %s", msg.payload)
             event.set()
 
-        test_topic = self._topic + "0/info/temperature/core"
-        _LOGGER.debug("Subscribing test topic: %s", test_topic)
-        await mqtt.async_subscribe(self.hass, test_topic, message_received)
+        topic1 = self._topic + "0/info/temperature/core"
+        _LOGGER.debug("Subscribing test topic1: %s", topic1)
+        unsub_topic1 = await mqtt.async_subscribe(self.hass, topic1, message_received)
+
+        topic2 = self._topic + "prism/energy_data/power_grid"
+        _LOGGER.debug("Subscribing test topic2: %s", topic2)
+        unsub_topic2 = await mqtt.async_subscribe(self.hass, topic2, message_received)
+
+        topic3 = self._topic + "hello"
+        _LOGGER.debug("Subscribing test topic3: %s", topic3)
+        unsub_topic3 = await mqtt.async_subscribe(self.hass, topic3, message_received)
+
         try:
             await asyncio.wait_for(event.wait(), 5)
         except TimeoutError:
             error = "Timeout expired"
 
+        unsub_topic1()
+        unsub_topic2()
+        unsub_topic3()
         return error
 
     async def _async_step_user_base(
