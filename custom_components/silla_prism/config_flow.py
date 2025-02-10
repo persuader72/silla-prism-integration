@@ -63,7 +63,7 @@ class SillaPrismConfigFlow(ConfigFlow, domain=DOMAIN):
         _LOGGER.debug("Subscribing test topic1: %s", topic1)
         unsub_topic1 = await mqtt.async_subscribe(self.hass, topic1, message_received)
 
-        topic2 = self._topic + "prism/energy_data/power_grid"
+        topic2 = self._topic + "energy_data/power_grid"
         _LOGGER.debug("Subscribing test topic2: %s", topic2)
         unsub_topic2 = await mqtt.async_subscribe(self.hass, topic2, message_received)
 
