@@ -18,7 +18,8 @@
                     "topic": "Topic",
                     "ports": "Number of available ports",
                     "serial": "Unique device code. Use if you have multiple devices",
-                    "vsensors": "Enable virtual sensors"
+                    "vsensors": "Enable virtual sensors",
+                    "maxcurr": "Maximum settable current 6A-32A"
                 },
                 "description": "Please enter connection settings of your device",
                 "title": "Configure Silla Prsim Integration"

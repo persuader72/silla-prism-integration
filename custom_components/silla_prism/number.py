@@ -57,7 +57,11 @@ class PrismNumber(PrismBaseEntity, NumberEntity):
     entity_description: PrismNumberEntityDescription
 
     def description(
-        self, port: int, mulitport: bool, description: PrismNumberEntityDescription
+        self,
+        port: int,
+        mulitport: bool,
+        max_current: int,
+        description: PrismNumberEntityDescription,
     ) -> PrismNumberEntityDescription:
         """Create a Number entity for Prism EVSE devices."""
         if mulitport:
@@ -68,7 +72,7 @@ class PrismNumber(PrismBaseEntity, NumberEntity):
                 entity_category=description.entity_category,
                 device_class=description.device_class,
                 native_min_value=description.native_min_value,
-                native_max_value=description.native_max_value,
+                native_max_value=max_current,
                 mode=description.mode,
                 has_entity_name=description.has_entity_name,
                 translation_key=description.translation_key,
@@ -80,7 +84,7 @@ class PrismNumber(PrismBaseEntity, NumberEntity):
             entity_category=description.entity_category,
             device_class=description.device_class,
             native_min_value=description.native_min_value,
-            native_max_value=description.native_max_value,
+            native_max_value=max_current,
             mode=description.mode,
             has_entity_name=description.has_entity_name,
             translation_key=description.translation_key,
@@ -93,13 +97,14 @@ class PrismNumber(PrismBaseEntity, NumberEntity):
         port: int,
     ) -> None:
         """Init Prism select."""
+        max_current = entry_data.maxcurr
         ismultiport = entry_data.ports > 1
         if not ismultiport:
             device = entry_data.devices[0]
         else:
             device = entry_data.devices[port]
 
-        _description = self.description(port, ismultiport, description)
+        _description = self.description(port, ismultiport, max_current, description)
         super().__init__(
             entry_data,
             NUMBER_DOMAIN,

@@ -13,4 +13,5 @@ class RuntimeEntryData:
     ports: int
     vsensors: bool
     serial: str
+    maxcurr: int
     devices: list[DeviceInfo]

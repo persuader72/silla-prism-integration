@@ -12,10 +12,12 @@ from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 from homeassistant.helpers import config_validation as cv
 
 from .const import (
+    CONF_MAX_CURRENT,
     CONF_PORTS,
     CONF_SERIAL,
     CONF_TOPIC,
     CONF_VSENSORS,
+    DEFAULT_MAX_CURRENT,
     DEFAULT_PORTS,
     DEFAULT_SERIAL,
     DEFAULT_TOPIC,
@@ -31,6 +33,7 @@ SILLA_PRISM_SCHEMA = vol.Schema(
         vol.Required(CONF_PORTS, default=DEFAULT_PORTS): cv.positive_int,
         vol.Optional(CONF_SERIAL, default=DEFAULT_SERIAL): cv.string,
         vol.Optional(CONF_VSENSORS, default=DEFAULT_VSENSORS): cv.boolean,
+        vol.Optional(CONF_MAX_CURRENT, default=DEFAULT_MAX_CURRENT): cv.positive_int,
     }
 )
 
@@ -47,6 +50,7 @@ class SillaPrismConfigFlow(ConfigFlow, domain=DOMAIN):
         self._ports: int = DEFAULT_PORTS
         self._vsensors: bool = DEFAULT_VSENSORS
         self._serial: str = DEFAULT_SERIAL
+        self._max_current: int = DEFAULT_MAX_CURRENT
 
     async def fetch_device_info(self) -> str | None:
         """Fetech information from MQTT."""
@@ -91,6 +95,9 @@ class SillaPrismConfigFlow(ConfigFlow, domain=DOMAIN):
             self._ports = user_input[CONF_PORTS]
             self._serial = re.sub(r"[^a-zA-Z0-9]", "", user_input[CONF_SERIAL])
             self._vsensors = user_input[CONF_VSENSORS]
+            self._max_current = max(
+                min(user_input[CONF_MAX_CURRENT], 32), 6
+            )  # clamp between 6 and 32
             return await self._async_try_fetch_device_info()
 
         errors = {}
@@ -126,6 +133,7 @@ class SillaPrismConfigFlow(ConfigFlow, domain=DOMAIN):
             CONF_PORTS: self._ports,
             CONF_SERIAL: self._serial,
             CONF_VSENSORS: self._vsensors,
+            CONF_MAX_CURRENT: self._max_current,
         }
         return self.async_create_entry(
             title="SillaPrism",

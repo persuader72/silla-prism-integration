@@ -10,7 +10,15 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.device_registry import DeviceInfo
 
-from .const import CONF_PORTS, CONF_SERIAL, CONF_TOPIC, CONF_VSENSORS, DOMAIN
+from .const import (
+    CONF_MAX_CURRENT,
+    CONF_PORTS,
+    CONF_SERIAL,
+    CONF_TOPIC,
+    CONF_VSENSORS,
+    DEFAULT_MAX_CURRENT,
+    DOMAIN,
+)
 from .domain_data import DomainData
 from .entry_data import RuntimeEntryData
 
@@ -42,6 +50,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     _ports = entry.data.get(CONF_PORTS, 1)
     _serial = entry.data.get(CONF_SERIAL, "")
     _vsensors = entry.data.get(CONF_VSENSORS, True)
+    _maxcurr = entry.data.get(CONF_MAX_CURRENT, DEFAULT_MAX_CURRENT)
     domain_data = DomainData.get(hass)
     _LOGGER.debug("entry.data: %s %s %s %s", _topic, _ports, _serial, _vsensors)
 
@@ -75,6 +84,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         ports=_ports,
         serial=_serial,
         vsensors=_vsensors,
+        maxcurr=_maxcurr,
         devices=_devices_info,
     )
     domain_data.set_entry_data(entry, entry_data)
