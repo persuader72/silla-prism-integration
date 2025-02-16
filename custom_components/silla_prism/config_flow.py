@@ -133,7 +133,10 @@ class SillaPrismConfigFlow(ConfigFlow, domain=DOMAIN):
                             CONF_TOPIC, default=entry.data[CONF_TOPIC]
                         ): cv.string,
                         vol.Optional(
-                            CONF_MAX_CURRENT, default=entry.data[CONF_MAX_CURRENT]
+                            CONF_MAX_CURRENT,
+                            default=entry.data.get(
+                                CONF_MAX_CURRENT, DEFAULT_MAX_CURRENT
+                            ),
                         ): cv.positive_int,
                     }
                 ),
