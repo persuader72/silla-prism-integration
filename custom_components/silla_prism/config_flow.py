@@ -96,9 +96,9 @@ class SillaPrismConfigFlow(ConfigFlow, domain=DOMAIN):
 
         if self.source == SOURCE_RECONFIGURE:
             entry = self._get_reconfigure_entry()
-            self._ports = entry.data[CONF_PORTS]
-            self._serial = entry.data[CONF_SERIAL]
-            self._vsensors = entry.data[CONF_VSENSORS]
+            self._ports = entry.data.get(CONF_PORTS, DEFAULT_PORTS)
+            self._serial = entry.data.get(CONF_SERIAL, DEFAULT_SERIAL)
+            self._vsensors = entry.data.get(CONF_VSENSORS, DEFAULT_VSENSORS)
         else:
             self._ports = user_input[CONF_PORTS]
             self._serial = re.sub(r"[^a-zA-Z0-9]", "", user_input[CONF_SERIAL])
