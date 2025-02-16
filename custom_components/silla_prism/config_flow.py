@@ -197,9 +197,9 @@ class SillaPrismConfigFlow(ConfigFlow, domain=DOMAIN):
 
         config_data = {
             CONF_TOPIC: self._topic,
-            CONF_PORTS: entry.data[CONF_PORTS],
-            CONF_SERIAL: entry.data[CONF_SERIAL],
-            CONF_VSENSORS: entry.data[CONF_VSENSORS],
+            CONF_PORTS: entry.data.get(CONF_PORTS, DEFAULT_PORTS),
+            CONF_SERIAL: entry.data.get(CONF_SERIAL, DEFAULT_SERIAL),
+            CONF_VSENSORS: entry.data.get(CONF_VSENSORS, DEFAULT_VSENSORS),
             CONF_MAX_CURRENT: self._max_current,
         }
         return self.async_update_reload_and_abort(
