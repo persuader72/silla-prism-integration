@@ -1,16 +1,15 @@
 {
     "config": {
         "abort": {
-            "all_configured": "All Philips Hue bridges are already configured",
-            "already_configured": "Bridge is already configured",
-            "cannot_connect": "Unable to connect to the bridge",
-            "discover_timeout": "Unable to discover Hue bridges",
-            "no_bridges": "No Philips Hue bridges discovered",
-            "unknown": "Unknown error occurred"
+            "already_configured": "Dispositivo già configurato",
+            "cannot_connect": "Impossibile connettersi al dispositivo",
+            "discover_timeout": "Impossibile scoprire i dispositivi",
+            "reconfigure_successful": "Dispositivo riconfigurato con successo",
+            "unknown": "Errore sconosciuto"
         },
         "error": {
-            "linking": "Unknown linking error occurred.",
-            "register_failed": "Failed to register, please try again"
+            "linking": "Errore di collegamento sconosciuto",
+            "register_failed": "Impossibile registrare, riprovare"
         },
         "step": {
             "user": {

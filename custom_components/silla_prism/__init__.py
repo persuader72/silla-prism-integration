@@ -17,6 +17,9 @@ from .const import (
     CONF_TOPIC,
     CONF_VSENSORS,
     DEFAULT_MAX_CURRENT,
+    DEFAULT_PORTS,
+    DEFAULT_SERIAL,
+    DEFAULT_VSENSORS,
     DOMAIN,
 )
 from .domain_data import DomainData
@@ -47,9 +50,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up the Silla Prism component."""
     _LOGGER.debug("async_setup_entry for Silla Prism")
     _topic = entry.data[CONF_TOPIC]
-    _ports = entry.data.get(CONF_PORTS, 1)
-    _serial = entry.data.get(CONF_SERIAL, "")
-    _vsensors = entry.data.get(CONF_VSENSORS, True)
+    _ports = entry.data.get(CONF_PORTS, DEFAULT_PORTS)
+    _serial = entry.data.get(CONF_SERIAL, DEFAULT_SERIAL)
+    _vsensors = entry.data.get(CONF_VSENSORS, DEFAULT_VSENSORS)
     _maxcurr = entry.data.get(CONF_MAX_CURRENT, DEFAULT_MAX_CURRENT)
     domain_data = DomainData.get(hass)
     _LOGGER.debug("entry.data: %s %s %s %s", _topic, _ports, _serial, _vsensors)

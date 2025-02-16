@@ -8,7 +8,11 @@ from typing import Any
 import voluptuous as vol
 
 from homeassistant.components import mqtt
-from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
+from homeassistant.config_entries import (
+    SOURCE_RECONFIGURE,
+    ConfigFlow,
+    ConfigFlowResult,
+)
 from homeassistant.helpers import config_validation as cv
 
 from .const import (
@@ -85,30 +89,71 @@ class SillaPrismConfigFlow(ConfigFlow, domain=DOMAIN):
         unsub_topic3()
         return error
 
+    async def _async_validate_device(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        _LOGGER.debug("Called with user input: %s source: %s", user_input, self.source)
+
+        if self.source == SOURCE_RECONFIGURE:
+            entry = self._get_reconfigure_entry()
+            self._ports = entry.data[CONF_PORTS]
+            self._serial = entry.data[CONF_SERIAL]
+            self._vsensors = entry.data[CONF_VSENSORS]
+        else:
+            self._ports = user_input[CONF_PORTS]
+            self._serial = re.sub(r"[^a-zA-Z0-9]", "", user_input[CONF_SERIAL])
+            self._vsensors = user_input[CONF_VSENSORS]
+
+        self._topic = user_input[CONF_TOPIC]
+        self._max_current = max(
+            min(user_input[CONF_MAX_CURRENT], 32), 6
+        )  # clamp between 6 and 32
+
+        return await self._async_try_fetch_device_info()
+
     async def _async_step_user_base(
         self, user_input: dict[str, Any] | None = None, error: str | None = None
     ) -> ConfigFlowResult:
         _LOGGER.info("Async_step_user %s", DOMAIN)
         if user_input is not None:
-            _LOGGER.debug("Called with user input: %s", user_input)
-            self._topic = user_input[CONF_TOPIC]
-            self._ports = user_input[CONF_PORTS]
-            self._serial = re.sub(r"[^a-zA-Z0-9]", "", user_input[CONF_SERIAL])
-            self._vsensors = user_input[CONF_VSENSORS]
-            self._max_current = max(
-                min(user_input[CONF_MAX_CURRENT], 32), 6
-            )  # clamp between 6 and 32
-            return await self._async_try_fetch_device_info()
+            return await self._async_validate_device(user_input)
 
         errors = {}
         if error is not None:
             errors["base"] = error
 
+        if self.source == SOURCE_RECONFIGURE:
+            # We are reconfiguring an existing device
+            entry = self._get_reconfigure_entry()
+            return self.async_show_form(
+                step_id="user",
+                data_schema=vol.Schema(
+                    {
+                        vol.Required(
+                            CONF_TOPIC, default=entry.data[CONF_TOPIC]
+                        ): cv.string,
+                        vol.Optional(
+                            CONF_MAX_CURRENT, default=entry.data[CONF_MAX_CURRENT]
+                        ): cv.positive_int,
+                    }
+                ),
+                errors=errors,
+            )
+        # We are creating a new device
         return self.async_show_form(
             step_id="user",
             data_schema=SILLA_PRISM_SCHEMA,
             errors=errors,
         )
+
+    async def async_step_reconfigure(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Handle a reconfiguration flow initialized by the user."""
+        if user_input is not None:
+            return await self._async_validate_device(user_input)
+
+        return await self._async_step_user_base()
 
     async def _async_try_fetch_device_info(self) -> ConfigFlowResult:
         """Try to fetch device info and return any errors."""
@@ -123,11 +168,15 @@ class SillaPrismConfigFlow(ConfigFlow, domain=DOMAIN):
             error = await self.fetch_device_info()
 
         if error is None:
-            return await self._async_get_entry()
+            if self.source == SOURCE_RECONFIGURE:
+                return await self._async_update_entry()
+            return await self._async_create_entry()
 
+        if self.source == SOURCE_RECONFIGURE:
+            return await self.async_step_reconfigure()
         return await self._async_step_user_base(error=error)
 
-    async def _async_get_entry(self) -> ConfigFlowResult:
+    async def _async_create_entry(self) -> ConfigFlowResult:
         config_data = {
             CONF_TOPIC: self._topic,
             CONF_PORTS: self._ports,
@@ -138,6 +187,21 @@ class SillaPrismConfigFlow(ConfigFlow, domain=DOMAIN):
         return self.async_create_entry(
             title="SillaPrism",
             data=config_data,
+        )
+
+    async def _async_update_entry(self) -> ConfigFlowResult:
+        entry = self._get_reconfigure_entry()
+
+        config_data = {
+            CONF_TOPIC: self._topic,
+            CONF_PORTS: entry.data[CONF_PORTS],
+            CONF_SERIAL: entry.data[CONF_SERIAL],
+            CONF_VSENSORS: entry.data[CONF_VSENSORS],
+            CONF_MAX_CURRENT: self._max_current,
+        }
+        return self.async_update_reload_and_abort(
+            self._get_reconfigure_entry(),
+            data_updates=config_data,
         )
 
     async def async_step_user(

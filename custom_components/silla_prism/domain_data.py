@@ -1,6 +1,7 @@
 """Support for Prism wallbox domain data."""
 
 from dataclasses import dataclass, field
+import logging
 from typing import Self, cast
 
 from homeassistant.config_entries import ConfigEntry
@@ -8,6 +9,8 @@ from homeassistant.core import HomeAssistant
 
 from .const import DOMAIN
 from .entry_data import RuntimeEntryData
+
+_LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(slots=True)
@@ -22,8 +25,11 @@ class DomainData:
 
     def set_entry_data(self, entry: ConfigEntry, entry_data: RuntimeEntryData) -> None:
         """Set the runtime entry data associated with this config entry."""
-        assert entry.entry_id not in self._entry_datas, "Entry data already set!"
-        self._entry_datas[entry.entry_id] = entry_data
+        if entry.entry_id not in self._entry_datas:
+            self._entry_datas[entry.entry_id] = entry_data
+        else:
+            _LOGGER.warning("Entry data already set! Overwriting!")
+            self._entry_datas[entry.entry_id] = entry_data
 
     @classmethod
     def get(cls, hass: HomeAssistant) -> Self:
