@@ -137,6 +137,7 @@ class PrismSelect(PrismBaseEntity, SelectEntity):
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""
         self._attr_current_option = option
+        self.schedule_update_ha_state()
         await mqtt.async_publish(
             self.hass, self._topic_out, self.options.index(option) + 1
         )
