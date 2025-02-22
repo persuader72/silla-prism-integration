@@ -51,6 +51,13 @@ async def async_setup_entry(
     sensors.extend(
         [PrismSensor(entry_data, description, 0) for description in BASE_SENSORS]
     )
+    if entry_data.powerwall:
+        sensors.extend(
+            [
+                PrismSensor(entry_data, description, 0)
+                for description in POWERWALL_SENSORS
+            ]
+        )
     if entry_data.vsensors:
         sensors.append(PrismGridEnergy(entry_data, VSENSORS[0]))
     async_add_entities(sensors)
@@ -356,6 +363,29 @@ BASE_SENSORS: tuple[PrismSensorEntityDescription, ...] = (
         suggested_display_precision=0,
         has_entity_name=True,
         translation_key="core_temperature",
+    ),
+)
+
+POWERWALL_SENSORS: tuple[PrismSensorEntityDescription, ...] = (
+    PrismSensorEntityDescription(
+        key="powerwall_solar",
+        topic="energy_data/power_solar",
+        device_class=SensorDeviceClass.POWER,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfPower.WATT,
+        suggested_display_precision=0,
+        has_entity_name=True,
+        translation_key="powerwall_solar",
+    ),
+    PrismSensorEntityDescription(
+        key="powerwall_house",
+        topic="energy_data/power_house",
+        device_class=SensorDeviceClass.POWER,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfPower.WATT,
+        suggested_display_precision=0,
+        has_entity_name=True,
+        translation_key="powerwall_house",
     ),
 )
 

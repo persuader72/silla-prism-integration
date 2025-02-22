@@ -18,6 +18,7 @@
                     "ports": "Numero delle porte disponibili",
                     "serial": "Codice univoco del dispositivo. Usare se si hanno piu' dispositivi",
                     "vsensors": "Abilita sensori virtuali",
+                    "powerwall": "Abilita sensori per il Powerwall",
                     "maxcurr": "Corrente massima impostabile 6A-32A"
                 },
                 "description": "Inseire i dettagli della connessione al dispositivo",
@@ -112,6 +113,12 @@
             },
             "input_grid_energy": {
                 "name": "Energia totale dalla rete"
+            },
+            "powerwall_solar": {
+                "name": "Potenza prodotta dal fotovoltaico"
+            },
+            "powerwall_house": {
+                "name": "Potenza consumata dalla casa"
             }
         }
     },

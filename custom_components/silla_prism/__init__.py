@@ -13,11 +13,13 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from .const import (
     CONF_MAX_CURRENT,
     CONF_PORTS,
+    CONF_POWERWALL,
     CONF_SERIAL,
     CONF_TOPIC,
     CONF_VSENSORS,
     DEFAULT_MAX_CURRENT,
     DEFAULT_PORTS,
+    DEFAULT_POWERWALL,
     DEFAULT_SERIAL,
     DEFAULT_VSENSORS,
     DOMAIN,
@@ -48,17 +50,15 @@ def _get_device_name(port: int, serial: str) -> str:
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up the Silla Prism component."""
-    _LOGGER.debug("async_setup_entry for Silla Prism")
     _topic = entry.data[CONF_TOPIC]
     _ports = entry.data.get(CONF_PORTS, DEFAULT_PORTS)
     _serial = entry.data.get(CONF_SERIAL, DEFAULT_SERIAL)
     _vsensors = entry.data.get(CONF_VSENSORS, DEFAULT_VSENSORS)
+    _powerwall = entry.data.get(CONF_POWERWALL, DEFAULT_POWERWALL)
     _maxcurr = entry.data.get(CONF_MAX_CURRENT, DEFAULT_MAX_CURRENT)
     domain_data = DomainData.get(hass)
-    _LOGGER.debug("entry.data: %s %s %s %s", _topic, _ports, _serial, _vsensors)
 
     _devices_info = []
-
     _devices_info.append(
         DeviceInfo(
             identifiers={(DOMAIN, _get_device_identifier(0, _serial))},
@@ -87,6 +87,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         ports=_ports,
         serial=_serial,
         vsensors=_vsensors,
+        powerwall=_powerwall,
         maxcurr=_maxcurr,
         devices=_devices_info,
     )

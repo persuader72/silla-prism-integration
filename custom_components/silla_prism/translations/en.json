@@ -18,6 +18,7 @@
                     "ports": "Number of available ports",
                     "serial": "Unique device code. Use if you have multiple devices",
                     "vsensors": "Enable virtual sensors",
+                    "powerwall": "Enable Powerwall sensors",
                     "maxcurr": "Maximum settable current 6A-32A"
                 },
                 "description": "Please enter connection settings of your device",
@@ -112,6 +113,12 @@
             },
             "input_grid_energy": {
                 "name": "Total energy from grid"
+            },
+            "powerwall_solar": {
+                "name": "Power produced by PV"
+            },
+            "powerwall_house": {
+                "name": "Power consumed by the house"
             }
         }
     },

@@ -18,11 +18,13 @@ from homeassistant.helpers import config_validation as cv
 from .const import (
     CONF_MAX_CURRENT,
     CONF_PORTS,
+    CONF_POWERWALL,
     CONF_SERIAL,
     CONF_TOPIC,
     CONF_VSENSORS,
     DEFAULT_MAX_CURRENT,
     DEFAULT_PORTS,
+    DEFAULT_POWERWALL,
     DEFAULT_SERIAL,
     DEFAULT_TOPIC,
     DEFAULT_VSENSORS,
@@ -37,6 +39,7 @@ SILLA_PRISM_SCHEMA = vol.Schema(
         vol.Required(CONF_PORTS, default=DEFAULT_PORTS): cv.positive_int,
         vol.Optional(CONF_SERIAL, default=DEFAULT_SERIAL): cv.string,
         vol.Optional(CONF_VSENSORS, default=DEFAULT_VSENSORS): cv.boolean,
+        vol.Optional(CONF_POWERWALL, default=DEFAULT_POWERWALL): cv.boolean,
         vol.Optional(CONF_MAX_CURRENT, default=DEFAULT_MAX_CURRENT): cv.positive_int,
     }
 )
@@ -53,6 +56,7 @@ class SillaPrismConfigFlow(ConfigFlow, domain=DOMAIN):
         self._topic: str | None = DEFAULT_TOPIC
         self._ports: int = DEFAULT_PORTS
         self._vsensors: bool = DEFAULT_VSENSORS
+        self._powerwall: bool = DEFAULT_POWERWALL
         self._serial: str = DEFAULT_SERIAL
         self._max_current: int = DEFAULT_MAX_CURRENT
 
@@ -99,10 +103,12 @@ class SillaPrismConfigFlow(ConfigFlow, domain=DOMAIN):
             self._ports = entry.data.get(CONF_PORTS, DEFAULT_PORTS)
             self._serial = entry.data.get(CONF_SERIAL, DEFAULT_SERIAL)
             self._vsensors = entry.data.get(CONF_VSENSORS, DEFAULT_VSENSORS)
+            self._powerwall = entry.data.get(CONF_POWERWALL, DEFAULT_POWERWALL)
         else:
             self._ports = user_input[CONF_PORTS]
             self._serial = re.sub(r"[^a-zA-Z0-9]", "", user_input[CONF_SERIAL])
             self._vsensors = user_input[CONF_VSENSORS]
+            self._powerwall = user_input[CONF_POWERWALL]
 
         self._topic = user_input[CONF_TOPIC]
         self._max_current = max(
@@ -185,6 +191,7 @@ class SillaPrismConfigFlow(ConfigFlow, domain=DOMAIN):
             CONF_PORTS: self._ports,
             CONF_SERIAL: self._serial,
             CONF_VSENSORS: self._vsensors,
+            CONF_POWERWALL: self._powerwall,
             CONF_MAX_CURRENT: self._max_current,
         }
         return self.async_create_entry(
@@ -200,6 +207,7 @@ class SillaPrismConfigFlow(ConfigFlow, domain=DOMAIN):
             CONF_PORTS: entry.data.get(CONF_PORTS, DEFAULT_PORTS),
             CONF_SERIAL: entry.data.get(CONF_SERIAL, DEFAULT_SERIAL),
             CONF_VSENSORS: entry.data.get(CONF_VSENSORS, DEFAULT_VSENSORS),
+            CONF_POWERWALL: entry.data.get(CONF_POWERWALL, DEFAULT_POWERWALL),
             CONF_MAX_CURRENT: self._max_current,
         }
         return self.async_update_reload_and_abort(
