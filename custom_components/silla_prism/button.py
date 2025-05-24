@@ -4,10 +4,6 @@ from collections.abc import Coroutine
 import logging
 from typing import Any
 
-from config.custom_components.silla_prism.const import BUTTON_DOMAIN
-from config.custom_components.silla_prism.domain_data import DomainData
-from config.custom_components.silla_prism.entity import _get_entity_id, _get_unique_id
-from config.custom_components.silla_prism.entry_data import RuntimeEntryData
 from homeassistant.components import mqtt
 from homeassistant.components.button import (
     ButtonDeviceClass,
@@ -18,6 +14,11 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+
+from .const import BUTTON_DOMAIN
+from .domain_data import DomainData
+from .entity import _get_entity_id, _get_unique_id
+from .entry_data import RuntimeEntryData
 
 _LOGGER = logging.getLogger(__name__)
 
