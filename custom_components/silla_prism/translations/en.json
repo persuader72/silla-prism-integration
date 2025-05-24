@@ -120,6 +120,14 @@
             "powerwall_house": {
                 "name": "Power consumed by the house"
             }
+        },
+        "button": {
+            "set_mode_traps_auth": {
+                "name": "Charge authorization"
+            },
+            "set_mode_traps_noauth": {
+                "name": "Revoke charge authorization"
+            }
         }
     },
     "title": "Silla Prism Integration"

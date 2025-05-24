@@ -120,6 +120,14 @@
             "powerwall_house": {
                 "name": "Potenza consumata dalla casa"
             }
+        },
+        "button": {
+            "set_mode_traps_auth": {
+                "name": "Autorizza ricarica"
+            },
+            "set_mode_traps_noauth": {
+                "name": "Revoca autorizzazione ricarica"
+            }
         }
     },
     "title": "Silla Prism connector"
