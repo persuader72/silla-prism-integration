@@ -1,7 +1,6 @@
 """Silla Prism button entity module."""
 
 from collections.abc import Coroutine
-import logging
 from typing import Any
 
 from homeassistant.components import mqtt
@@ -20,8 +19,6 @@ from .domain_data import DomainData
 from .entity import _get_entity_id, _get_unique_id
 from .entry_data import RuntimeEntryData
 
-_LOGGER = logging.getLogger(__name__)
-
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -30,7 +27,6 @@ async def async_setup_entry(
 ) -> None:
     """Add entities for passed config_entry in HA."""
     entry_data: RuntimeEntryData = DomainData.get(hass).get_entry_data(entry)
-    _LOGGER.debug("async_setup_entry for select: %s", entry_data)
 
     ports = entry_data.ports
     selects = []
@@ -72,17 +68,14 @@ class PrismCommand(ButtonEntity):
 
     async def async_added_to_hass(self) -> Coroutine[Any, Any, None]:
         """Subscribe to mqtt."""
-        _LOGGER.debug("async_added_to_hass key:%s", self.entity_description.key)
         return super().async_added_to_hass()
 
     async def async_will_remove_from_hass(self) -> Coroutine[Any, Any, None]:
         """Unsubscribe from mqtt."""
-        _LOGGER.debug("async_will_remove_from_hass key:%s", self.entity_description.key)
         await super().async_will_remove_from_hass()
 
     async def async_press(self) -> None:
         """Press the button."""
-        _LOGGER.debug("async_press key:%s", self.entity_description.key)
         await mqtt.async_publish(
             self.hass,
             self._get_topic(),
