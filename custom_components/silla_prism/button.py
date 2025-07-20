@@ -103,7 +103,7 @@ BUTTONS: tuple[PrismCommandEntityDescription, ...] = (
         translation_key="set_mode_traps_auth",
         command="set_mode_traps",
         device_class=ButtonDeviceClass.IDENTIFY,
-        parameter="+auth",
+        parameter="-auth",
     ),
     PrismCommandEntityDescription(
         key="set_mode_traps_noauth",
@@ -111,6 +111,6 @@ BUTTONS: tuple[PrismCommandEntityDescription, ...] = (
         translation_key="set_mode_traps_noauth",
         command="set_mode_traps",
         device_class=ButtonDeviceClass.IDENTIFY,
-        parameter="-auth",
+        parameter="+auth",
     ),
 )
