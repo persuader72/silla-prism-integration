@@ -21,7 +21,7 @@
                     "powerwall": "Abilita sensori per il Powerwall",
                     "maxcurr": "Corrente massima impostabile 6A-32A"
                 },
-                "description": "Inseire i dettagli della connessione al dispositivo",
+                "description": "Inserire i dettagli della connessione al dispositivo",
                 "title": "Configurazione Silla Prsim"
             }
         }
@@ -55,7 +55,7 @@
         },
         "select": {
             "set_port_mode": {
-                "name": "Imposta modlit\u00e0 porta",
+                "name": "Imposta modalit\u00e0 porta",
                 "state": {
                     "solar": "Solare",
                     "normal": "Normale",
