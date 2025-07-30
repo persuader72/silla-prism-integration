@@ -69,60 +69,175 @@ Computed entities are not directly measured from Prism but are derived from othe
 |                               |        |                              |      |
 
 
+# Setting up the user interface
 
-## Charger Card Integragtion
+## With the charger card integration
 
 ![Charger](images/setup4.png)
 
 It's possible to configure the [EV Charger Card](https://github.com/tmjo/charger-card) using the configuration example [provided](https://github.com/persuader72/custom-components/blob/main/charger-card/template.yaml) in this repository 
 
-# Touch button and Automations
+## With automations and helpers
 
-This are some example automations for the touch button events
+The following four examples show how to set up a simple interface
+via Home Assistant helpers (input booleans) and automations.  You do
+not have to use all four!
 
-### Start charge after single touch event if Prism is in pause state
+These automations and input booleans can also be used with the
+EV Charger Card, though they are most useful without it.
+
+### Start/stop charge with a switch
+
+For now, disable Autostart on the Prism (later I will show how to keep
+it enabled).
+
+Create an "Input Boolean" called `prism_charge` (suggested icon:
+`mdi:ev-plug-type2`).  The following automation starts and stop the
+charging process when `prism_charge` is toggled:
 
 ```yaml
-alias: Avvia ricarica dopo pressione pulsante
-description: Avvia ricarica dopo pressione pulsante
-trigger:
-  - platform: state
+alias: Prism - authorize/deauthorize
+triggers:
+  - trigger: state
     entity_id:
-      - binary_sensor.silla_prism_touch_sigle
-    from: "off"
-    to: "on"
-condition:
-  - condition: state
-    entity_id: sensor.silla_prism_current_state
-    state: pause
-action:
-  - service: select.set_option
-    data:
-      entity_id: select.silla_prism_set_mode
-      option: normal
+      - input_boolean.prism_charge
+actions:
+  - if:
+      - condition: state
+        entity_id: sensor.silla_prism_current_state
+        state: idle
+    then:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.prism_charge
+      - stop: No charging cable connected
+  - if:
+      - condition: state
+        entity_id: sensor.silla_prism_current_state
+        state: pause
+    then:
+      - action: button.press
+        target:
+          entity_id: button.silla_prism_set_mode_traps_auth
+    else:
+      - action: button.press
+        target:
+          entity_id: button.silla_prism_set_mode_traps_noauth
 mode: single
 ```
 
-### Stop charge after single touch event if Prism is in charging state
+### Start/stop charge with a single touch on the Prism
+
+With the previous set up, Autostart is disabled, but starting/stopping
+the charge process with the Prism key fobs does not synchronize with
+the Input Boolean.
+
+Instead of using the key fobs, you can configure another automation that
+toggles the Input Boolean with a single touch on the Prism's sensor:
 
 ```yaml
-alias: Interrompi ricarica dopo pressione pulsante
-description: Interrompi ricarica dopo pressione pulsante
-trigger:
-  - platform: state
+alias: Prism - toggle charge after single touch event
+description: ""
+triggers:
+  - trigger: state
     entity_id:
       - binary_sensor.silla_prism_touch_sigle
-    from: "off"
-    to: "on"
-condition:
-  - condition: state
-    entity_id: sensor.silla_prism_current_state
-    state: charging
-action:
-  - service: select.set_option
-    data:
-      entity_id: select.silla_prism_set_mode
-      option: paused
+    to: on
+actions:
+  - action: input_boolean.toggle
+    target:
+      entity_id: input_boolean.prism_charge
 mode: single
 ```
 
+### Same setup but with Autostart enabled
+
+If you prefer to keep Autostart enabled or to use the key fobs, just ensure
+`prism_charge` changes to on and off when `sensor.silla_prism_current_state`
+becomes respectively `charging` or anything else:
+
+```yaml
+alias: Prism - synchronize charging state
+description: ""
+triggers:
+  - trigger: state
+    entity_id:
+      - sensor.silla_prism_current_state
+    id: changed_prism
+actions:
+  - if:
+      - condition: state
+        entity_id: sensor.silla_prism_current_state
+        state: charging
+    then:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.prism_charge
+  - else:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.prism_charge
+mode: single
+```
+
+This can be used with any combination of the previous automations.
+
+### Switch normal/solar modes from Home Assistant
+
+Create an "Input Boolean" called `prism_solar_mode` (suggested icon:
+`mdi:weather-sunny`).  The following automation keeps it synchronized
+with the "solar" and "normal" modes of the Prism dashboard:
+
+```yaml
+alias: Prism - synchronize solar/normal mode
+description: ""
+triggers:
+  - trigger: state
+    entity_id:
+      - input_boolean.prism_solar_mode
+    id: changed_helper
+  - trigger: state
+    entity_id:
+      - sensor.silla_prism_current_port_mode
+    id: changed_prism
+actions:
+  - if:
+      - condition: trigger
+        id:
+          - changed_helper
+    then:
+      - if:
+          - condition: state
+            entity_id: input_boolean.prism_solar_mode
+            state: on
+        then:
+          - action: select.select_option
+            data:
+              option: solar
+            target:
+              entity_id: select.silla_prism_set_mode
+        else:
+          - action: select.select_option
+            data:
+              option: normal
+            target:
+              entity_id: select.silla_prism_set_mode
+    else:
+      - if:
+          - condition: state
+            entity_id: sensor.silla_prism_current_port_mode
+            state: solar
+        then:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.prism_solar_mode
+      - if:
+          - condition: state
+            entity_id: sensor.silla_prism_current_port_mode
+            state: normal
+        then:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.prism_solar_mode
+mode: single
+```
