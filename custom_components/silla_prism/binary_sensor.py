@@ -167,16 +167,13 @@ class PrismEventBinarySensor(PrismBinarySensor):
         # Handle input touch button
         _seq = msg.payload.split(",")
         try:
-            _seq_int = [int(x) for x in _seq]
-            if len(_seq_int) == len(self._sequence):
-                for i, s in enumerate(_seq_int):
-                    if self._sequence[i] != s:
-                        break
-            self._attr_is_on = True
-            self._expiration_trigger = async_call_later(
-                self.hass, 2.0, self._restore_value
-            )
-            self.schedule_update_ha_state()
+            _seq_int = tuple(int(x) for x in _seq)
+            if _seq_int == self._sequence:
+                self._attr_is_on = True
+                self._expiration_trigger = async_call_later(
+                    self.hass, 2.0, self._restore_value
+                )
+                self.schedule_update_ha_state()
         except ValueError:
             pass
 
