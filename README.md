@@ -101,6 +101,11 @@ triggers:
   - trigger: state
     entity_id:
       - input_boolean.prism_charge
+    id: changed_switch
+  - trigger: state
+    entity_id:
+      - sensor.silla_prism_current_state
+    id: changed_state
 actions:
   - if:
       - condition: state
@@ -111,10 +116,13 @@ actions:
         target:
           entity_id: input_boolean.prism_charge
       - stop: No charging cable connected
+  - condition: trigger
+    id:
+      - changed_switch
   - if:
       - condition: state
-        entity_id: sensor.silla_prism_current_state
-        state: pause
+        entity_id: input_boolean.prism_charge
+        state: 'on'
     then:
       - action: button.press
         target:
