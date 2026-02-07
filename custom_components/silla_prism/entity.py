@@ -9,25 +9,14 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity import Entity, EntityDescription
 from homeassistant.helpers.event import async_call_later
 
-from .const import DOMAIN
 from .entry_data import RuntimeEntryData
 
 _LOGGER = logging.getLogger(__name__)
-# ENTITY_ID_SENSOR_FORMAT = "{}." + DOMAIN + "_{}"
 
 
 def _get_unique_id(serial: str, key: str) -> str:
     """Get a unique entity id."""
     return "prism_" + key + "_001" if serial == "" else f"prism_{serial}_{key}"
-
-
-def _get_entity_id(serial: str, entity_type: str, key: str) -> str:
-    """Get a entity id."""
-    return (
-        f"{entity_type}.{DOMAIN}_{key}"
-        if serial == ""
-        else f"{entity_type}.{DOMAIN}_{serial}_{key}"
-    )
 
 
 class PrismBaseEntityDescription(EntityDescription, frozen_or_thawed=True):
@@ -56,9 +45,6 @@ class PrismBaseEntity(Entity):
         self._attr_device_info = device
         self.entity_description = description
         # Preload attributes
-        self.entity_id = _get_entity_id(
-            entry_data.serial, sensor_domain, description.key
-        )
         self._attr_unique_id = _get_unique_id(entry_data.serial, description.key)
         self._topic = entry_data.topic + description.topic
         self._expire_after = description.expire_after

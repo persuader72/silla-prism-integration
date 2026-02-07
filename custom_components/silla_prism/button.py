@@ -14,9 +14,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import BUTTON_DOMAIN
 from .domain_data import DomainData
-from .entity import _get_entity_id, _get_unique_id
+from .entity import _get_unique_id
 from .entry_data import RuntimeEntryData
 
 
@@ -61,9 +60,6 @@ class PrismCommand(ButtonEntity):
         self._port = port
         self._attr_device_info = self._get_device(entry_data, port)
         self.entity_description = description
-        self.entity_id = _get_entity_id(
-            entry_data.serial, BUTTON_DOMAIN, description.key
-        )
         self._attr_unique_id = _get_unique_id(entry_data.serial, description.key)
 
     async def async_added_to_hass(self) -> Coroutine[Any, Any, None]:
