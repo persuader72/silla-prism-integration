@@ -29,7 +29,7 @@ from homeassistant.helpers.restore_state import RestoreEntity
 
 from .const import SENSOR_DOMAIN
 from .domain_data import DomainData
-from .entity import PrismBaseEntity, _get_entity_id, _get_unique_id
+from .entity import PrismBaseEntity, _get_unique_id
 from .entry_data import RuntimeEntryData
 
 _LOGGER = logging.getLogger(__name__)
@@ -81,9 +81,6 @@ class PrismGridEnergy(SensorEntity, RestoreEntity):
     ) -> None:
         """Init Prism energy sensor."""
         self._attr_device_info = entry_data.devices[0]
-        self.entity_id = _get_entity_id(
-            entry_data.serial, SENSOR_DOMAIN, description.key
-        )
         self.entity_description = description
         self._attr_unique_id = _get_unique_id(entry_data.serial, description.key)
         self._integral: Decimal = Decimal(0)
