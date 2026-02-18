@@ -48,7 +48,7 @@ Solar automation is a work in progress. And we be described in [Solar](solar.md)
 | silla_prism_session_time          | Sensor       | Duration of the current session                              | s                                      |
 | silla_prism_session_output_energy | Sensor       | Energy provided to the charging port during the current session | Wh                                     |
 | silla_prism_total_output_energy   | Sensor       | Total energy                                                 | Wh                                     |
-| ?/1/error                         | (TODO)       | Error code                                                   |                                        |
+| silla_prism_error                 | BinarySensor | Error status (ON when there is an error)                     |                                        |
 | silla_prism_current_port_mode     | Sensor       | Current port mode                                            | solar,normal,paused                    |
 | silla_prism_input_grid_power      | Sensor       | Input power from grid                                        | W                                      |
 | silla_prism_set_max_current       | Number       | Set the user current limit                                   | A                                      |

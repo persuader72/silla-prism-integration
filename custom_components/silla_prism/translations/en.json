@@ -43,6 +43,9 @@
                     "on": "Online",
                     "off": "Offline"
                 }
+            },
+            "error": {
+                "name": "Error status"
             }
         },
         "number": {

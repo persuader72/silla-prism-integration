@@ -43,6 +43,9 @@
                     "on": "Connesso",
                     "off": "Disconnesso"
                 }
+            },
+            "error": {
+                "name": "In errore"
             }
         },
         "number": {

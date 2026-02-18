@@ -36,16 +36,22 @@ async def async_setup_entry(
         for description in BASE_BINARYSENSORS
     ]
 
-    events = []
     ports = entry_data.ports
     for port in range(1, ports + 1):
-        events.extend(
+        binsens.extend(
             [
-                PrismEventBinarySensor(entry_data, description, port)
-                for description in EVENTSENSORS
+                PrismErrorBinarySensor(entry_data, description, port)
+                for description in ERROR_BINARYSENSORS
             ]
         )
-    async_add_entities(binsens + events)
+        binsens.extend(
+            [
+                PrismEventBinarySensor(entry_data, description, port)
+                for description in EVENTS_BINARYSENSORS
+            ]
+        )
+
+    async_add_entities(binsens)
 
 
 class PrismBinarySensorEntityDescription(
@@ -100,6 +106,67 @@ class PrismBinarySensor(PrismBaseEntity, BinarySensorEntity):
     def _value_is_expired(self):
         """Triggered when value is expired."""
         self._attr_is_on = False
+
+
+class PrismErrorBinarySensor(PrismBinarySensor):
+    """Prism error binary sensor entity."""
+
+    entity_description: PrismBinarySensorEntityDescription
+
+    def _get_description(
+        self,
+        port: int,
+        mulitport: bool,
+        description: PrismBinarySensorEntityDescription,
+    ) -> PrismBinarySensorEntityDescription:
+        if port == 0:
+            return description
+        if mulitport:
+            return PrismBinarySensorEntityDescription(
+                key=description.key.format(port),
+                topic=description.topic.format(port),
+                entity_category=description.entity_category,
+                device_class=description.device_class,
+                has_entity_name=description.has_entity_name,
+                translation_key=description.translation_key,
+                expire_after=description.expire_after,
+            )
+        return PrismBinarySensorEntityDescription(
+            key=description.key[:-3],
+            topic=description.topic.format(port),
+            entity_category=description.entity_category,
+            device_class=description.device_class,
+            has_entity_name=description.has_entity_name,
+            translation_key=description.translation_key,
+            expire_after=description.expire_after,
+        )
+
+    def __init__(
+        self,
+        entry_data: RuntimeEntryData,
+        description: PrismBinarySensorEntityDescription,
+        port: int,
+    ) -> None:
+        """Init Prism error binary sensor."""
+        ismultiport = entry_data.ports > 1
+        super().__init__(
+            entry_data, self._get_description(port, ismultiport, description), port
+        )
+
+    @override
+    def _message_received(self, msg) -> None:
+        """Update the error sensor with the most recent event."""
+        self.schedule_expiration_callback()
+
+        try:
+            error_value = int(msg.payload)
+            # OFF when value is 0, ON when different from 0
+            self._attr_is_on = error_value != 0
+        except (ValueError, TypeError):
+            # If we can't parse the value, assume there's an error
+            self._attr_is_on = True
+
+        self.schedule_update_ha_state()
 
     async def async_added_to_hass(self) -> None:
         """Subscribe to mqtt."""
@@ -197,7 +264,17 @@ BASE_BINARYSENSORS = [
     ),
 ]
 
-EVENTSENSORS = [
+ERROR_BINARYSENSORS = [
+    PrismBinarySensorEntityDescription(
+        key="error_{}",
+        topic="{}/error",
+        device_class=BinarySensorDeviceClass.PROBLEM,
+        has_entity_name=True,
+        translation_key="error",
+    ),
+]
+
+EVENTS_BINARYSENSORS = [
     PrismEventBinarySensorEntityDescription(
         key="touch_sigle_{}",
         topic="{}/input/touch",
