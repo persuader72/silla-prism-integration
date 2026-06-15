@@ -36,27 +36,27 @@ Solar automation is a work in progress. And we be described in [Solar](solar.md)
 
 ## Entities
 
-| Entity ID                         | Type         | Description                                                  | Unit                                   |
-| --------------------------------- | ------------ | ------------------------------------------------------------ | -------------------------------------- |
-| silla_prism_online                | BinarySensor | Sensor to find if Prism is connected or not                  |                                        |
-| silla_prism_current_state         | Sensor       | Current state of Prism                                       | "idle", "waiting", "charging", "pause" |
-| silla_prism_power_grid_voltage    | Sensor       | Measured voltage from grid                                   | V                                      |
-| silla_prism_output_power          | Sensor       | Power provided to the charging port                          | W                                      |
-| silla_prism_output_current        | Sensor       | Current provided to the charging port                        | mA                                     |
-| silla_prism_output_car_current    | Sensor       | Current driven by the car                                    | A                                      |
-| silla_prism_current_set_by_user   | Sensor       | Current limit set by user                                    | A                                      |
-| silla_prism_session_time          | Sensor       | Duration of the current session                              | s                                      |
+| Entity ID                         | Type         | Description                                                     | Unit                                   |
+| --------------------------------- | ------------ | --------------------------------------------------------------- | -------------------------------------- |
+| silla_prism_online                | BinarySensor | Sensor to find if Prism is connected or not                     |                                        |
+| silla_prism_current_state         | Sensor       | Current state of Prism                                          | "idle", "waiting", "charging", "pause" |
+| silla_prism_power_grid_voltage    | Sensor       | Measured voltage from grid                                      | V                                      |
+| silla_prism_output_power          | Sensor       | Power provided to the charging port                             | W                                      |
+| silla_prism_output_current        | Sensor       | Current provided to the charging port                           | mA                                     |
+| silla_prism_output_car_current    | Sensor       | Current driven by the car                                       | A                                      |
+| silla_prism_current_set_by_user   | Sensor       | Current limit set by user                                       | A                                      |
+| silla_prism_session_time          | Sensor       | Duration of the current session                                 | s                                      |
 | silla_prism_session_output_energy | Sensor       | Energy provided to the charging port during the current session | Wh                                     |
-| silla_prism_total_output_energy   | Sensor       | Total energy                                                 | Wh                                     |
-| silla_prism_error                 | BinarySensor | Error status (ON when there is an error)                     |                                        |
-| silla_prism_current_port_mode     | Sensor       | Current port mode                                            | solar,normal,paused                    |
-| silla_prism_input_grid_power      | Sensor       | Input power from grid                                        | W                                      |
-| silla_prism_set_max_current       | Number       | Set the user current limit                                   | A                                      |
-| silla_prism_set_current_limit     | Number       | Set the  current limit                                       | A                                      |
-| silla_prism_set_mode              | Select       | Set current port mode                                        | solar,normal,paused                    |
-| silla_prism_touch_sigle           | BinarySensor | Goes on for 1 second after a single touch gesture            | On,Off                                 |
-| silla_prism_touch_double          | BinarySensor | Goes on for 1 second after a double touch gesture            | On,Off                                 |
-| silla_prism_touch_long            | BinarySensor | Goes on for 1 second after a long touch gesture              | On,Off                                 |
+| silla_prism_total_output_energy   | Sensor       | Total energy                                                    | Wh                                     |
+| silla_prism_error                 | BinarySensor | Error status (ON when there is an error)                        |                                        |
+| silla_prism_current_port_mode     | Sensor       | Current port mode                                               | solar,normal,hybrid,paused             |
+| silla_prism_input_grid_power      | Sensor       | Input power from grid                                           | W                                      |
+| silla_prism_set_max_current       | Number       | Set the user current limit                                      | A                                      |
+| silla_prism_set_current_limit     | Number       | Set the  current limit                                          | A                                      |
+| silla_prism_set_mode              | Select       | Set current port mode                                           | solar,normal,hybrid,paused             |
+| silla_prism_touch_sigle           | BinarySensor | Goes on for 1 second after a single touch gesture               | On,Off                                 |
+| silla_prism_touch_double          | BinarySensor | Goes on for 1 second after a double touch gesture               | On,Off                                 |
+| silla_prism_touch_long            | BinarySensor | Goes on for 1 second after a long touch gesture                 | On,Off                                 |
 
 ## Computed Entities
 
