@@ -329,6 +329,7 @@ SENSORS: tuple[PrismSensorEntityDescription, ...] = (
             "solar",
             "normal",
             "paused",
+            "hybrid",
             "suspended",
             "unknown",
             "unknown",
