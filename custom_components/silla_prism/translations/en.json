@@ -60,8 +60,9 @@
             "set_port_mode": {
                 "name": "Set port output mode",
                 "state": {
-                    "solar": "Solar",
-                    "normal": "Normal",
+                    "solar": "OnlySun",
+                    "normal": "Boost",
+                    "hybrid": "Hybrid",
                     "paused": "Paused"
                 }
             }
@@ -73,9 +74,10 @@
             "current_port_mode": {
                 "name": "Current port output mode",
                 "state": {
-                    "solar": "Solar",
-                    "normal": "Normal",
+                    "solar": "OnlySun",
+                    "normal": "Boost",
                     "paused": "Paused",
+                    "hybrid": "Hybrid",
                     "suspended": "Suspended",
                     "unknown": "Unknown",
                     "autolimit": "Auto limit"

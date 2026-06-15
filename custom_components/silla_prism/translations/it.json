@@ -60,8 +60,9 @@
             "set_port_mode": {
                 "name": "Imposta modalit\u00e0 porta",
                 "state": {
-                    "solar": "Solare",
-                    "normal": "Normale",
+                    "solar": "OnlySun",
+                    "normal": "Boost",
+                    "hybrid": "Hybrid",
                     "paused": "In pausa"
                 }
             }
@@ -73,9 +74,10 @@
             "current_port_mode": {
                 "name": "Modo della porta",
                 "state": {
-                    "solar": "Solare",
-                    "normal": "Normale",
+                    "solar": "OnlySun",
+                    "normal": "Boost",
                     "paused": "In pausa",
+                    "hybrid": "Hybrid",
                     "suspended": "In sospeso",
                     "unknown": "Sconosciuto",
                     "autolimit": "Auto limitazione"

@@ -149,7 +149,7 @@ SELECTS: tuple[PrismSelectEntityDescription, ...] = (
         topic="{}/mode",
         topic_out="{}/command/set_mode",
         entity_category=EntityCategory.CONFIG,
-        options=["solar", "normal", "paused"],
+        options=["solar", "normal", "paused", "hybrid"],
         has_entity_name=True,
         translation_key="set_port_mode",
     ),
