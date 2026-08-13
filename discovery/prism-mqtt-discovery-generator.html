@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Silla Prism — MQTT discovery script generator</title>
+  <style>
+    :root {
+      --bg: #12151c;
+      --panel: #1b2030;
+      --panel-2: #232a3d;
+      --line: #343c55;
+      --text: #e8ecf4;
+      --muted: #9aa6bd;
+      --accent: #e8a54b;
+      --accent-2: #3dbf9c;
+      --danger: #e06c75;
+      --mono: "IBM Plex Mono", "ui-monospace", Menlo, Consolas, monospace;
+      --sans: "Segoe UI", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      background: radial-gradient(1200px 500px at 10% -10%, #2a334c 0%, var(--bg) 55%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    header {
+      padding: 2rem 1.5rem 1rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    header h1 {
+      margin: 0 0 0.4rem;
+      font-size: 1.55rem;
+      font-weight: 650;
+    }
+    header p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 62ch;
+      line-height: 1.5;
+    }
+    .outputs {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      min-width: 0;
+    }
+    .example-label {
+      display: inline-block;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--bg);
+      background: var(--muted);
+      border-radius: 4px;
+      padding: 0.12rem 0.4rem;
+      margin-right: 0.45rem;
+      font-weight: 700;
+    }
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1rem 1.5rem 3rem;
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 1.25rem;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      main { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1.1rem 1.15rem;
+    }
+    label.field {
+      display: block;
+      margin-bottom: 0.95rem;
+    }
+    label.field span {
+      display: block;
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 0.55rem 0.7rem;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      color: var(--text);
+      font: 1rem var(--mono);
+    }
+    input[type="text"]:focus {
+      outline: 2px solid var(--accent);
+      border-color: transparent;
+    }
+    .hint { font-size: 0.8rem; color: var(--muted); margin-top: 0.3rem; }
+    .check {
+      display: flex;
+      gap: 0.7rem;
+      align-items: flex-start;
+      padding: 0.7rem 0.75rem;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      margin-bottom: 0.7rem;
+      cursor: pointer;
+    }
+    .check input { margin-top: 0.2rem; accent-color: var(--accent); }
+    .check strong { display: block; }
+    .check small { color: var(--muted); }
+    .error {
+      color: var(--danger);
+      font-size: 0.85rem;
+      min-height: 1.2rem;
+      margin: 0 0 0.6rem;
+    }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    button {
+      border: 0;
+      border-radius: 8px;
+      padding: 0.5rem 0.85rem;
+      font: 600 0.9rem var(--sans);
+      cursor: pointer;
+      background: var(--accent);
+      color: #1a1408;
+    }
+    button.secondary {
+      background: var(--panel-2);
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+    button:hover { filter: brightness(1.08); }
+    pre {
+      margin: 0;
+      max-height: 55vh;
+      overflow: auto;
+      background: #0e1118;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0.9rem;
+      font: 0.78rem/1.45 var(--mono);
+      white-space: pre;
+    }
+    pre.example {
+      max-height: 22vh;
+      opacity: 0.9;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin: 0 0 0.7rem;
+    }
+    .meta b { color: var(--accent-2); }
+    ol.howto {
+      margin: 0.4rem 0 0;
+      padding-left: 1.15rem;
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.45;
+    }
+    a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Silla Prism MQTT discovery generator</h1>
+    <p>
+      Builds a Home Assistant
+      <a href="https://www.home-assistant.io/docs/scripts">script</a>
+      that publishes MQTT device discovery through
+      <a href="https://www.home-assistant.io/integrations/mqtt/">mqtt.publish</a>.
+      An example automation that can run the script at startup is shown separately.
+    </p>
+  </header>
+  <main>
+    <form class="card" id="form" autocomplete="off">
+      <label class="field">
+        <span>1. Prism serial number</span>
+        <input id="serial" type="text" value="A00006" spellcheck="false" required>
+        <div class="hint">From the <code>hello</code> topic, e.g. Prism-<b>A00006</b>. Only letters, digits, <code>_</code> and <code>-</code>.</div>
+      </label>
+      <label class="field">
+        <span>MQTT base topic</span>
+        <input id="baseTopic" type="text" value="prism/" spellcheck="false">
+        <div class="hint">Must match the topic base in the Silla app. A trailing <code>/</code> is added if missing.</div>
+      </label>
+      <label class="check">
+        <input id="powerwall" type="checkbox">
+        <div>
+          <strong>2. Powerwall present</strong>
+          <small>Adds solar and house power sensors on <code>energy_data/power_solar</code> and <code>energy_data/power_house</code>.</small>
+        </div>
+      </label>
+      <label class="check">
+        <input id="duo" type="checkbox">
+        <div>
+          <strong>3. Prism DUO (two ports)</strong>
+          <small>Duplicates port-scoped entities for cable 1 (left) and cable 2 (right).</small>
+        </div>
+      </label>
+      <label class="check">
+        <input id="useUi" type="checkbox">
+        <div>
+          <strong>Use UI</strong>
+          <small>Output starts at <code>sequence:</code> so you can paste it into the Home Assistant script editor.</small>
+        </div>
+      </label>
+      <p class="error" id="error"></p>
+      <div class="toolbar">
+        <button type="submit">Generate YAML</button>
+        <button type="button" class="secondary" id="copy">Copy</button>
+        <button type="button" class="secondary" id="download">Download</button>
+      </div>
+      <ol class="howto" id="howto-yaml">
+        <li>Copy or download the script YAML.</li>
+        <li>Paste it into <code>scripts.yaml</code> (omit the top-level <code>script:</code> key if that file is already included), or merge it into <code>configuration.yaml</code>.</li>
+        <li>Reload scripts, then run the script once to publish discovery.</li>
+        <li>Do not use this together with the custom <code>silla_prism</code> integration on the same serial.</li>
+      </ol>
+      <ol class="howto" id="howto-ui" hidden>
+        <li>Copy the script YAML (it starts at <code>sequence:</code>).</li>
+        <li>In Home Assistant go to <strong>Settings → Automations &amp; scenes → Scripts</strong>.</li>
+        <li>Select <strong>Create script</strong>, then the three-dots menu → <strong>Edit in YAML</strong>.</li>
+        <li>Replace the editor contents with the generated script and save.</li>
+        <li>Run the script once to publish discovery. Do not use it together with the custom <code>silla_prism</code> integration on the same serial.</li>
+      </ol>
+    </form>
+    <div class="outputs">
+      <section class="card">
+        <p class="meta" id="meta">Fill the form to generate a script.</p>
+        <pre id="output"></pre>
+      </section>
+      <section class="card">
+        <p class="meta">
+          <span class="example-label">Example</span>
+          Optional automation to run the script when Home Assistant starts or MQTT comes online. Reference only — it is not included in copy or download.
+        </p>
+        <pre id="automation" class="example"></pre>
+      </section>
+    </div>
+  </main>
+  <script>
+    const TPL = {
+      state: "{% set map = {'1':'idle','2':'waiting','3':'charging','4':'pause'} %}{{ map.get(value, 'unknown') }}",
+      mode: "{% set map = {'1':'solar','2':'normal','3':'paused','4':'hybrid','5':'suspended','6':'unknown','7':'unknown','8':'autolimit'} %}{{ map.get(value, 'unknown') }}",
+      modeSelect: "{% set map = {'1':'solar','2':'normal','3':'paused','4':'hybrid','7':'paused'} %}{{ map.get(value, 'normal') }}",
+      modeCmd: "{{ {'solar':1,'normal':2,'paused':3,'hybrid':4}[value] }}",
+      error: "{{ 'ON' if value | int != 0 else 'OFF' }}",
+      touch1: "{{ 'ON' if value == '1' else 'OFF' }}",
+      touch2: "{{ 'ON' if value == '1,1' else 'OFF' }}",
+      touch3: "{{ 'ON' if value == '3' else 'OFF' }}",
+      intCurrent: "{{ value | int }}",
+      current: "{{ value }}",
+    };
+
+    function uid(serial, port, key, duo) {
+      if (!duo || port === 1) return "prism_" + serial + "_" + key;
+      return "prism_" + serial + "_p" + port + "_" + key;
+    }
+
+    function cid(port, key) {
+      return port === 1 ? key : key + "_" + port;
+    }
+
+    function label(duo, port, name) {
+      return duo ? "Port " + port + " " + name : name;
+    }
+
+    function portComponents(serial, port, duo, base) {
+      const t = (path) => base + port + "/" + path;
+      const n = (name) => label(duo, port, name);
+      const id = (key) => uid(serial, port, key, duo);
+      const c = (key) => cid(port, key);
+      return {
+        [c("state")]: {
+          p: "sensor",
+          name: n("Charge state"),
+          unique_id: id("state"),
+          stat_t: t("state"),
+          dev_cla: "enum",
+          ops: ["idle", "waiting", "charging", "pause", "unknown"],
+          val_tpl: TPL.state,
+          ic: "mdi:ev-station",
+        },
+        [c("mode")]: {
+          p: "sensor",
+          name: n("Port mode"),
+          unique_id: id("mode"),
+          stat_t: t("mode"),
+          dev_cla: "enum",
+          ops: ["solar", "normal", "paused", "hybrid", "suspended", "unknown", "autolimit"],
+          val_tpl: TPL.mode,
+          ic: "mdi:solar-power",
+        },
+        [c("volt")]: {
+          p: "sensor",
+          name: n("Voltage"),
+          unique_id: id("volt"),
+          stat_t: t("volt"),
+          dev_cla: "voltage",
+          stat_cla: "measurement",
+          unit_of_meas: "V",
+          sug_dsp_prc: 0,
+        },
+        [c("w")]: {
+          p: "sensor",
+          name: n("Output power"),
+          unique_id: id("w"),
+          stat_t: t("w"),
+          dev_cla: "power",
+          stat_cla: "measurement",
+          unit_of_meas: "W",
+          sug_dsp_prc: 0,
+        },
+        [c("amp")]: {
+          p: "sensor",
+          name: n("Output current"),
+          unique_id: id("amp"),
+          stat_t: t("amp"),
+          dev_cla: "current",
+          stat_cla: "measurement",
+          unit_of_meas: "mA",
+          sug_dsp_prc: 0,
+        },
+        [c("pilot")]: {
+          p: "sensor",
+          name: n("Pilot current"),
+          unique_id: id("pilot"),
+          stat_t: t("pilot"),
+          dev_cla: "current",
+          stat_cla: "measurement",
+          unit_of_meas: "A",
+          sug_dsp_prc: 0,
+        },
+        [c("user_amp")]: {
+          p: "sensor",
+          name: n("User current"),
+          unique_id: id("user_amp"),
+          stat_t: t("user_amp"),
+          dev_cla: "current",
+          stat_cla: "measurement",
+          unit_of_meas: "A",
+          sug_dsp_prc: 0,
+        },
+        [c("session_time")]: {
+          p: "sensor",
+          name: n("Session time"),
+          unique_id: id("session_time"),
+          stat_t: t("session_time"),
+          dev_cla: "duration",
+          stat_cla: "measurement",
+          unit_of_meas: "s",
+          sug_dsp_prc: 0,
+        },
+        [c("wh")]: {
+          p: "sensor",
+          name: n("Session energy"),
+          unique_id: id("wh"),
+          stat_t: t("wh"),
+          dev_cla: "energy",
+          stat_cla: "total",
+          unit_of_meas: "Wh",
+          sug_dsp_prc: 0,
+        },
+        [c("wh_total")]: {
+          p: "sensor",
+          name: n("Total energy"),
+          unique_id: id("wh_total"),
+          stat_t: t("wh_total"),
+          dev_cla: "energy",
+          stat_cla: "total_increasing",
+          unit_of_meas: "Wh",
+          sug_dsp_prc: 0,
+        },
+        [c("error_code")]: {
+          p: "sensor",
+          name: n("Error code"),
+          unique_id: id("error_code"),
+          stat_t: t("error"),
+          ent_cat: "diagnostic",
+          ic: "mdi:alert-circle-outline",
+        },
+        [c("error")]: {
+          p: "binary_sensor",
+          name: n("Problem"),
+          unique_id: id("error"),
+          stat_t: t("error"),
+          dev_cla: "problem",
+          val_tpl: TPL.error,
+          pl_on: "ON",
+          pl_off: "OFF",
+        },
+        [c("touch_single")]: {
+          p: "binary_sensor",
+          name: n("Touch single"),
+          unique_id: id("touch_single"),
+          stat_t: t("input/touch"),
+          ent_cat: "diagnostic",
+          dev_cla: "occupancy",
+          val_tpl: TPL.touch1,
+          pl_on: "ON",
+          pl_off: "OFF",
+          off_dly: 1,
+        },
+        [c("touch_double")]: {
+          p: "binary_sensor",
+          name: n("Touch double"),
+          unique_id: id("touch_double"),
+          stat_t: t("input/touch"),
+          ent_cat: "diagnostic",
+          dev_cla: "occupancy",
+          val_tpl: TPL.touch2,
+          pl_on: "ON",
+          pl_off: "OFF",
+          off_dly: 1,
+        },
+        [c("touch_long")]: {
+          p: "binary_sensor",
+          name: n("Touch long"),
+          unique_id: id("touch_long"),
+          stat_t: t("input/touch"),
+          ent_cat: "diagnostic",
+          dev_cla: "occupancy",
+          val_tpl: TPL.touch3,
+          pl_on: "ON",
+          pl_off: "OFF",
+          off_dly: 1,
+        },
+        [c("set_mode")]: {
+          p: "select",
+          name: n("Set mode"),
+          unique_id: id("set_mode"),
+          ent_cat: "config",
+          stat_t: t("mode"),
+          cmd_t: t("command/set_mode"),
+          ops: ["solar", "normal", "paused", "hybrid"],
+          val_tpl: TPL.modeSelect,
+          cmd_tpl: TPL.modeCmd,
+        },
+        [c("set_current_user")]: {
+          p: "number",
+          name: n("Set user current"),
+          unique_id: id("set_current_user"),
+          ent_cat: "config",
+          dev_cla: "current",
+          unit_of_meas: "A",
+          min: 6,
+          max: 16,
+          step: 1,
+          mode: "box",
+          stat_t: t("user_amp"),
+          cmd_t: t("command/set_current_user"),
+          cmd_tpl: TPL.intCurrent,
+        },
+        [c("set_current_limit")]: {
+          p: "number",
+          name: n("Set current limit"),
+          unique_id: id("set_current_limit"),
+          ent_cat: "config",
+          dev_cla: "current",
+          unit_of_meas: "A",
+          min: 6,
+          max: 16,
+          step: 0.1,
+          mode: "box",
+          stat_t: t("pilot"),
+          cmd_t: t("command/set_current_limit"),
+          cmd_tpl: TPL.current,
+        },
+        [c("enable_night")]: {
+          p: "button",
+          name: n("Enable schedule"),
+          unique_id: id("enable_night"),
+          ent_cat: "config",
+          cmd_t: t("command/enable_night"),
+          pl_prs: "1",
+          ic: "mdi:weather-night",
+        },
+        [c("disable_night")]: {
+          p: "button",
+          name: n("Disable schedule"),
+          unique_id: id("disable_night"),
+          ent_cat: "config",
+          cmd_t: t("command/disable_night"),
+          pl_prs: "1",
+          ic: "mdi:weather-night-off",
+        },
+        [c("auth")]: {
+          p: "button",
+          name: n("Authorize"),
+          unique_id: id("auth"),
+          cmd_t: t("command/set_mode_traps"),
+          pl_prs: "-auth",
+          ic: "mdi:lock-open-variant",
+        },
+        [c("deauth")]: {
+          p: "button",
+          name: n("Deauthorize"),
+          unique_id: id("deauth"),
+          cmd_t: t("command/set_mode_traps"),
+          pl_prs: "+auth",
+          ic: "mdi:lock",
+        },
+      };
+    }
+
+    function buildPayload(serial, baseTopic, duo, powerwall) {
+      const objectId = "prism_" + serial;
+      const cmps = {
+        hello: {
+          p: "sensor",
+          name: "Firmware",
+          unique_id: "prism_" + serial + "_hello",
+          stat_t: baseTopic + "hello",
+          ent_cat: "diagnostic",
+          ic: "mdi:information-outline",
+        },
+        power_grid: {
+          p: "sensor",
+          name: "Grid power",
+          unique_id: "prism_" + serial + "_power_grid",
+          stat_t: baseTopic + "energy_data/power_grid",
+          dev_cla: "power",
+          stat_cla: "measurement",
+          unit_of_meas: "W",
+          sug_dsp_prc: 0,
+        },
+      };
+      Object.assign(cmps, portComponents(serial, 1, duo, baseTopic));
+      if (duo) Object.assign(cmps, portComponents(serial, 2, duo, baseTopic));
+      if (powerwall) {
+        cmps.power_solar = {
+          p: "sensor",
+          name: "Solar power",
+          unique_id: "prism_" + serial + "_power_solar",
+          stat_t: baseTopic + "energy_data/power_solar",
+          dev_cla: "power",
+          stat_cla: "measurement",
+          unit_of_meas: "W",
+          sug_dsp_prc: 0,
+        };
+        cmps.power_house = {
+          p: "sensor",
+          name: "House power",
+          unique_id: "prism_" + serial + "_power_house",
+          stat_t: baseTopic + "energy_data/power_house",
+          dev_cla: "power",
+          stat_cla: "measurement",
+          unit_of_meas: "W",
+          sug_dsp_prc: 0,
+        };
+      }
+      return {
+        objectId,
+        topic: "homeassistant/device/" + objectId + "/config",
+        payload: {
+          dev: {
+            ids: [objectId],
+            name: duo ? "Silla Prism DUO " + serial : "Silla Prism " + serial,
+            mf: "Silla",
+            mdl: duo ? "Prism DUO" : "Prism",
+            sn: serial,
+          },
+          o: {
+            name: "silla-prism-mqtt-discovery",
+            sw: "4.0",
+            url: "https://silla.industries/centro-assistenza/",
+          },
+          cmps,
+        },
+      };
+    }
+
+    function indent(text, n) {
+      const pad = " ".repeat(n);
+      return text.split("\n").map((line) => (line ? pad + line : line)).join("\n");
+    }
+
+    function buildYaml(serial, baseTopic, duo, powerwall, useUi) {
+      const built = buildPayload(serial, baseTopic, duo, powerwall);
+      const json = JSON.stringify(built.payload, null, 2);
+      const scriptId = "silla_prism_mqtt_discovery_" + serial.toLowerCase().replace(/-/g, "_");
+      const entityCount = Object.keys(built.payload.cmps).length;
+      const header = [
+        "# Silla Prism MQTT device discovery",
+        "# Serial: " + serial + " | DUO: " + (duo ? "yes" : "no") + " | Powerwall: " + (powerwall ? "yes" : "no"),
+        "# Entities: " + entityCount,
+        "#",
+        "# Home Assistant script syntax: https://www.home-assistant.io/docs/scripts",
+        "# MQTT publish action: https://www.home-assistant.io/integrations/mqtt/",
+        "#",
+        "# The {% raw %} block keeps Jinja templates inside the discovery JSON",
+        "# from being rendered when this script runs.",
+        "",
+      ];
+      const sequence = useUi
+        ? [
+            "sequence:",
+            "  - alias: Publish MQTT discovery payload",
+            "    action: mqtt.publish",
+            "    data:",
+            "      topic: " + built.topic,
+            "      qos: 0",
+            "      retain: true",
+            "      payload: |",
+            "        {% raw %}",
+            indent(json, 8),
+            "        {% endraw %}",
+          ]
+        : [
+            "script:",
+            "  " + scriptId + ":",
+            "    alias: Publish Silla Prism " + serial + " MQTT discovery",
+            "    description: Publish Home Assistant MQTT device discovery for Silla Prism " + serial,
+            "    icon: mdi:ev-station",
+            "    mode: restart",
+            "    sequence:",
+            "      - alias: Publish MQTT discovery payload",
+            "        action: mqtt.publish",
+            "        data:",
+            "          topic: " + built.topic,
+            "          qos: 0",
+            "          retain: true",
+            "          payload: |",
+            "            {% raw %}",
+            indent(json, 12),
+            "            {% endraw %}",
+          ];
+      const scriptYaml = header.concat(sequence).join("\n");
+      const automationYaml = [
+        "# Example only — not copied or downloaded.",
+        "# Create this automation if you want the script to run at startup.",
+        useUi
+          ? "# After saving the UI script, replace the action target with its entity_id (script.xxxx)."
+          : "# Action target: script." + scriptId,
+        "",
+        "automation:",
+        "  - id: " + scriptId + "_on_start",
+        "    alias: Silla Prism " + serial + " MQTT discovery on start",
+        "    description: Run discovery publish when Home Assistant starts or MQTT comes online",
+        "    mode: restart",
+        "    triggers:",
+        "      - trigger: homeassistant",
+        "        event: start",
+        "      - trigger: mqtt",
+        "        topic: homeassistant/status",
+        "        payload: online",
+        "    actions:",
+        "      - action: script." + scriptId,
+      ].join("\n");
+      return { yaml: scriptYaml, automationYaml, entityCount, topic: built.topic, scriptId };
+    }
+
+    function normalizeBase(topic) {
+      const t = topic.trim() || "prism/";
+      return t.endsWith("/") ? t : t + "/";
+    }
+
+    function generate() {
+      const error = document.getElementById("error");
+      const serial = document.getElementById("serial").value.trim();
+      const duo = document.getElementById("duo").checked;
+      const powerwall = document.getElementById("powerwall").checked;
+      const useUi = document.getElementById("useUi").checked;
+      const baseTopic = normalizeBase(document.getElementById("baseTopic").value);
+      if (!/^[a-zA-Z0-9_-]+$/.test(serial)) {
+        error.textContent = "Serial must use only A–Z, a–z, 0–9, underscore, or hyphen.";
+        return null;
+      }
+      error.textContent = "";
+      const result = buildYaml(serial, baseTopic, duo, powerwall, useUi);
+      document.getElementById("output").textContent = result.yaml;
+      document.getElementById("automation").textContent = result.automationYaml;
+      document.getElementById("howto-yaml").hidden = useUi;
+      document.getElementById("howto-ui").hidden = !useUi;
+      document.getElementById("meta").innerHTML =
+        "Discovery topic <b>" + result.topic + "</b> · " +
+        result.entityCount + " entities" +
+        (useUi ? " · paste into the script YAML editor" : " · script.<b>" + result.scriptId + "</b>");
+      return result;
+    }
+
+    document.getElementById("form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      generate();
+    });
+    ["serial", "baseTopic", "duo", "powerwall", "useUi"].forEach((id) => {
+      document.getElementById(id).addEventListener("input", generate);
+      document.getElementById(id).addEventListener("change", generate);
+    });
+    document.getElementById("copy").addEventListener("click", async () => {
+      const result = generate();
+      if (!result) return;
+      await navigator.clipboard.writeText(result.yaml);
+      document.getElementById("copy").textContent = "Copied";
+      setTimeout(() => { document.getElementById("copy").textContent = "Copy"; }, 1500);
+    });
+    document.getElementById("download").addEventListener("click", () => {
+      const result = generate();
+      if (!result) return;
+      const blob = new Blob([result.yaml], { type: "text/yaml" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = result.scriptId + ".yaml";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+    generate();
+  </script>
+</body>
+</html>
