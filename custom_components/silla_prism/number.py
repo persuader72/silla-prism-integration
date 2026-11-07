@@ -11,7 +11,7 @@ from homeassistant.components.number import (
     NumberMode,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import EntityCategory
+from homeassistant.const import EntityCategory, UnitOfElectricCurrent
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -71,6 +71,7 @@ class PrismNumber(PrismBaseEntity, NumberEntity):
                 topic_out=description.topic_out.format(port),
                 entity_category=description.entity_category,
                 device_class=description.device_class,
+                native_unit_of_measurement=description.native_unit_of_measurement,
                 native_min_value=description.native_min_value,
                 native_max_value=max_current,
                 mode=description.mode,
@@ -83,6 +84,7 @@ class PrismNumber(PrismBaseEntity, NumberEntity):
             topic_out=description.topic_out.format(port),
             entity_category=description.entity_category,
             device_class=description.device_class,
+            native_unit_of_measurement=description.native_unit_of_measurement,
             native_min_value=description.native_min_value,
             native_max_value=max_current,
             mode=description.mode,
@@ -153,6 +155,7 @@ NUMBERS: tuple[PrismNumberEntityDescription, ...] = (
         topic_out="{}/command/set_current_user",
         entity_category=EntityCategory.CONFIG,
         device_class=NumberDeviceClass.CURRENT,
+        native_unit_of_measurement=UnitOfElectricCurrent.AMPERE,
         native_min_value=6,
         native_max_value=16,
         mode=NumberMode.BOX,
@@ -165,6 +168,7 @@ NUMBERS: tuple[PrismNumberEntityDescription, ...] = (
         topic_out="{}/command/set_current_limit",
         entity_category=EntityCategory.CONFIG,
         device_class=NumberDeviceClass.CURRENT,
+        native_unit_of_measurement=UnitOfElectricCurrent.AMPERE,
         native_min_value=6,
         native_max_value=16,
         has_entity_name=True,
